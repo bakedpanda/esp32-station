@@ -23,7 +23,7 @@
 
 **Depends on:** Nothing (first phase)
 
-**Requirements:** BOARD-01, BOARD-02, BOARD-03, BOARD-04, FLASH-01, FLASH-02, FLASH-03, FLASH-04, FLASH-05, MCP-01, MCP-02, MCP-03
+**Requirements:** BOARD-01, BOARD-02, BOARD-04, FLASH-01, FLASH-02, FLASH-03, FLASH-04, FLASH-05, MCP-01, MCP-02, MCP-03
 
 **Success Criteria** (what must be TRUE):
 1. Claude can list all ESP32 boards currently connected via USB and identify each board's chip variant (ESP32, S2, S3, C3, C6)
