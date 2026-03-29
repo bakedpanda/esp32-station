@@ -16,6 +16,8 @@ from tools.repl import exec_repl, read_serial, soft_reset, hard_reset
 from tools.serial_lock import SerialLock
 from tools.ota_wifi import deploy_ota_wifi as _deploy_ota_wifi
 from tools.github_deploy import pull_and_deploy_github as _pull_and_deploy_github
+from tools.board_status import get_status as _get_status, check_health as _check_health
+from tools.mdns_discovery import discover_boards as _discover_boards
 
 mcp = FastMCP("esp32-station", host="0.0.0.0", port=8000)
 
@@ -247,6 +249,46 @@ def pull_and_deploy_github(
             return result
     except TimeoutError as e:
         return {"error": "serial_lock_timeout", "detail": str(e)}
+
+
+@mcp.tool()
+def get_board_status(port: str | None = None, host: str | None = None, password: str | None = None) -> dict:
+    """Get firmware version, WiFi status, IP, free memory/storage from an ESP32 board.
+
+    Provide port for USB or host+password for WiFi. Exactly one transport required.
+    """
+    if port is not None:
+        try:
+            with SerialLock(port):
+                return _get_status(port=port)
+        except TimeoutError as e:
+            return {"error": "serial_lock_timeout", "detail": str(e)}
+    return _get_status(host=host, password=password)
+
+
+@mcp.tool()
+def check_board_health(port: str | None = None, host: str | None = None, password: str | None = None) -> dict:
+    """Check if a board is alive and running MicroPython.
+
+    Returns status: 'healthy', 'unresponsive', or 'not_found'.
+    Provide port for USB or host+password for WiFi.
+    """
+    if port is not None:
+        try:
+            with SerialLock(port):
+                return _check_health(port=port)
+        except TimeoutError as e:
+            return {"error": "serial_lock_timeout", "detail": str(e)}
+    return _check_health(host=host, password=password)
+
+
+@mcp.tool()
+def discover_boards(timeout: int = 3) -> list[dict] | dict:
+    """Discover MicroPython boards on the LAN via mDNS (looks for _webrepl._tcp).
+
+    Returns list of {hostname, ip, port} for each board found. Empty list if none found.
+    """
+    return _discover_boards(timeout=timeout)
 
 
 if __name__ == "__main__":
