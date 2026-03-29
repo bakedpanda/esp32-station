@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.1
+milestone_name: Provisioning & Onboarding
+status: executing
+stopped_at: v1.1 roadmap created, ready to plan Phase 4
+last_updated: "2026-03-29T18:25:34.763Z"
+last_activity: 2026-03-29 -- Phase 04 execution started
+progress:
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 0
+  percent: 55
+---
+
 # Project State
 
 ## Project Reference
@@ -5,21 +21,22 @@
 See: .planning/PROJECT.md (updated 2026-03-29)
 
 **Core value:** Claude can flash, deploy, and debug any connected ESP32 without the user having to leave their editor or remember tooling commands.
-**Current focus:** Phase 4: Hardening (v1.1 Provisioning & Onboarding)
+**Current focus:** Phase 04 — hardening
 
 ## Current Position
 
-Phase: 4 of 7 (Hardening)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-03-29 -- Plan 04-01 complete (tech debt fixes)
+Phase: 04 (hardening) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 04
+Last activity: 2026-03-29 -- Phase 04 execution started
 Milestone: v1.1 (Provisioning & Onboarding)
 
-Progress: [============........] 60% (12 plans complete, ~7 remaining)
+Progress: [===========.........] 55% (11 plans complete, ~8 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 11 (v1.0)
 - Total execution time: ~4.5 hours (v1.0)
 
@@ -30,7 +47,7 @@ Progress: [============........] 60% (12 plans complete, ~7 remaining)
 | 1. Foundation | 4/4 | Complete |
 | 2. Core USB | 3/3 | Complete |
 | 3. WiFi & Advanced | 4/4 | Complete |
-| 4. Hardening | 1/2 | In Progress |
+| 4. Hardening | 0/? | Not started |
 | 5. Board Status | 0/? | Not started |
 | 6. Provisioning | 0/? | Not started |
 | 7. Setup & Onboarding | 0/? | Not started |
@@ -58,5 +75,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-29
-Stopped at: Completed 04-01-PLAN.md (tech debt fixes)
+Stopped at: v1.1 roadmap created, ready to plan Phase 4
 Resume file: None
