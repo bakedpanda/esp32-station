@@ -24,8 +24,8 @@ All capabilities are exposed as MCP tools — Claude calls them directly, no cop
 **1. Clone and install dependencies**
 
 ```bash
-git clone https://github.com/bakedpanda/ESP32-server.git
-cd ESP32-server
+git clone https://github.com/bakedpanda/ESP32-server.git esp32-station
+cd esp32-station
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -70,6 +70,8 @@ Replace `raspberrypi.local` with your Pi's hostname or IP if different.
 | `exec_repl_command` | Execute a MicroPython command and capture output |
 | `read_board_serial` | Read recent serial output from a board |
 | `reset_board` | Soft or hard reset a board via USB |
+| `deploy_ota_wifi` | Deploy a file to a board over WiFi via WebREPL |
+| `pull_and_deploy_github` | Pull a GitHub repo and deploy to a board via USB |
 
 ## Architecture
 
@@ -84,7 +86,9 @@ Raspberry Pi :8000
         ├── firmware_flash.py   — Firmware cache + flash (esptool)
         ├── file_deploy.py      — File/dir deploy (mpremote)
         ├── repl.py             — REPL exec, serial read, reset (mpremote)
-        └── serial_lock.py      — Per-port file lock (prevents USB conflicts)
+        ├── serial_lock.py      — Per-port file lock (prevents USB conflicts)
+        ├── ota_wifi.py         — WiFi OTA deploy (webrepl_cli.py subprocess)
+        └── github_deploy.py    — GitHub clone + deploy (git + deploy_directory)
     │
     ▼
 ESP32 board(s) via USB
@@ -109,7 +113,7 @@ pytest
 |-------|-----------------|--------|
 | 1 — Foundation & Infrastructure | MCP server + board detection + firmware flashing | Complete |
 | 2 — Core USB Workflows | File deploy + REPL + serial lock + error handling | Complete |
-| 3 — WiFi & Advanced | WebREPL OTA + GitHub deploy | In progress |
+| 3 — WiFi & Advanced | WebREPL OTA + GitHub deploy | Complete |
 
 ## Out of scope
 
