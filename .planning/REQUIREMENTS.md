@@ -26,7 +26,7 @@
 - [x] **DEPLOY-02**: Claude can deploy a full project directory to a board via USB serial
 - [x] **DEPLOY-03**: Pre-deployment check verifies sufficient filesystem space (60–70% safe capacity)
 - [x] **DEPLOY-04**: Deployment verifies file integrity after transfer
-- [ ] **DEPLOY-05**: Claude can pull the latest code from a GitHub repo and deploy it to the board
+- [x] **DEPLOY-05**: Claude can pull the latest code from a GitHub repo and deploy it to the board
 
 ### REPL & Serial Access
 
@@ -44,8 +44,8 @@
 
 ### OTA (WiFi Updates)
 
-- [ ] **OTA-01**: Claude can push a code update to a board over WiFi (WebREPL or equivalent)
-- [ ] **OTA-02**: OTA falls back to USB if WiFi is unavailable
+- [x] **OTA-01**: Claude can push a code update to a board over WiFi (WebREPL or equivalent)
+- [x] **OTA-02**: OTA falls back to USB if WiFi is unavailable
 
 ## v2 Requirements
 
@@ -93,7 +93,7 @@
 | DEPLOY-02 | Phase 2 | Complete |
 | DEPLOY-03 | Phase 2 | Complete |
 | DEPLOY-04 | Phase 2 | Complete |
-| DEPLOY-05 | Phase 3 | Pending |
+| DEPLOY-05 | Phase 3 | Complete |
 | REPL-01 | Phase 2 | Complete |
 | REPL-02 | Phase 2 | Complete |
 | REPL-03 | Phase 2 | Complete |
@@ -102,8 +102,8 @@
 | MCP-03 | Phase 1 | Complete |
 | MCP-04 | Phase 2 | Complete |
 | MCP-05 | Phase 2 | Complete |
-| OTA-01 | Phase 3 | Pending |
-| OTA-02 | Phase 3 | Pending |
+| OTA-01 | Phase 3 | Complete |
+| OTA-02 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 24 total
