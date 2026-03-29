@@ -334,7 +334,9 @@ def deploy_boot_config(port: str, hostname: str | None = None) -> dict:
         port: Serial port path, e.g. "/dev/ttyUSB0"
         hostname: Board hostname for mDNS discovery (default: "esp32").
                   Sets network.hostname() so board is reachable at hostname.local.
-                  Ask the user for a meaningful name like "esp32-kitchen".
+                  Ask the user for a name in the format: {name}-esp32-{id}
+                  (e.g. "kitchen-esp32-a1b2"). The unique ID helps distinguish
+                  multiple boards of the same type on the network.
     """
     try:
         with SerialLock(port):
