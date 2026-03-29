@@ -14,14 +14,14 @@ Claude can flash, deploy, and debug any connected ESP32 without the user having 
 
 - [x] Flash MicroPython firmware onto ESP32 boards via USB (supports 5 variants: classic, S2/S3, C3/C6) — Validated in Phase 01: Foundation Infrastructure
 - [x] Expose all capabilities as an MCP server accessible to Claude on the main machine over LAN — Validated in Phase 01: Foundation Infrastructure
+- [x] Deploy MicroPython project files to ESP32 via USB serial — Validated in Phase 02: Core USB Workflows
+- [x] Read serial output and run REPL commands on connected ESP32 boards — Validated in Phase 02: Core USB Workflows
+- [x] Per-port serial locking (concurrent tool calls to same board serialize safely) — Validated in Phase 02: Core USB Workflows
 
 ### Active
 
 - [ ] Flash MicroPython firmware onto ESP32 boards via USB (supports mixed variants: classic, S2/S3, C3/C6)
-- [ ] Deploy MicroPython project files to ESP32 via USB serial
 - [ ] Deploy MicroPython project files to ESP32 via OTA over WiFi
-- [ ] Read serial output and run REPL commands on connected ESP32 boards
-- [ ] Expose all capabilities as an MCP server accessible to Claude on the main machine over LAN
 - [ ] Pull project code from GitHub for deployment
 
 ### Out of Scope
@@ -73,4 +73,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-28 after initialization*
+*Last updated: 2026-03-29 — Phase 02 complete: file deploy, REPL, reset, serial locking, 9 MCP tools registered*
