@@ -12,7 +12,8 @@ Claude can flash, deploy, and debug any connected ESP32 without the user having 
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Flash MicroPython firmware onto ESP32 boards via USB (supports 5 variants: classic, S2/S3, C3/C6) — Validated in Phase 01: Foundation Infrastructure
+- [x] Expose all capabilities as an MCP server accessible to Claude on the main machine over LAN — Validated in Phase 01: Foundation Infrastructure
 
 ### Active
 
@@ -49,9 +50,10 @@ Claude can flash, deploy, and debug any connected ESP32 without the user having 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| MCP server over REST API | Allows Claude to call tools directly without user copying output; better DX for the primary use case | — Pending |
-| Pi as deployment hub | Centralizes USB connections and WiFi bridge; main machine stays clean | — Pending |
+| MCP server over REST API | Allows Claude to call tools directly without user copying output; better DX for the primary use case | Implemented — streamable-http on port 8000 |
+| Pi as deployment hub | Centralizes USB connections and WiFi bridge; main machine stays clean | Implemented — systemd daemon, auto-start on boot |
 | GitHub as code source | User's existing workflow; Pi pulls latest from repo to deploy | — Pending |
+| host/port on FastMCP() not run() | FastMCP.run() does not accept host/port in mcp>=1.26 | Applied in Phase 01 |
 
 ## Evolution
 
