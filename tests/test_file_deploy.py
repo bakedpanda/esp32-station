@@ -27,18 +27,15 @@ def _make_run_result(returncode=0, stdout="", stderr=""):
 
 
 DF_OUTPUT_OK = (
-    "               Size      Used     Avail  Use% Mounted on\n"
-    "/              512000    51200    460800   10% /\n"
+    "/       : 512000 bytes total,   51200 bytes used,  460800 bytes free\n"
 )
 
 DF_OUTPUT_WARN = (
-    "               Size      Used     Avail  Use% Mounted on\n"
-    "/              512000   368640    143360   72% /\n"
+    "/       : 512000 bytes total,  368640 bytes used,  143360 bytes free\n"
 )
 
 DF_OUTPUT_FULL = (
-    "               Size      Used     Avail  Use% Mounted on\n"
-    "/              512000   460800     51200   90% /\n"
+    "/       : 512000 bytes total,  460800 bytes used,   51200 bytes free\n"
 )
 
 
