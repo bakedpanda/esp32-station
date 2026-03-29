@@ -11,7 +11,7 @@
 
 - [ ] **Phase 1: Foundation & Infrastructure** - MCP server skeleton + board detection + firmware flashing via USB
 - [ ] **Phase 2: Core USB Workflows** - File deployment + REPL access + error handling
-- [ ] **Phase 3: WiFi & Advanced** - OTA updates + GitHub integration
+- [x] **Phase 3: WiFi & Advanced** - OTA updates + GitHub integration (completed 2026-03-29)
 
 ---
 
@@ -79,13 +79,13 @@ Plans:
 2. OTA updates fall back to USB automatically if WiFi is unavailable or times out
 3. Claude can pull the latest code from a GitHub repository and deploy it to a board with a single MCP tool call
 
-**Plans:** 1/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 03-01-PLAN.md — Wave 0 setup: install venv deps, vendor webrepl_cli.py, write failing test stubs
 - [x] 03-02-PLAN.md — OTA WiFi module: tools/ota_wifi.py with deploy_ota_wifi() (OTA-01, OTA-02)
 - [x] 03-03-PLAN.md — GitHub deploy module: tools/github_deploy.py with pull_and_deploy_github() (DEPLOY-05)
-- [ ] 03-04-PLAN.md — MCP wiring: register deploy_ota_wifi and pull_and_deploy_github as @mcp.tool()
+- [x] 03-04-PLAN.md — MCP wiring: register deploy_ota_wifi and pull_and_deploy_github as @mcp.tool()
 
 ---
 
@@ -95,7 +95,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Infrastructure | 0/4 | Planned | - |
 | 2. Core USB Workflows | 1/3 | In Progress|  |
-| 3. WiFi & Advanced | 1/4 | In Progress|  |
+| 3. WiFi & Advanced | 4/4 | Complete   | 2026-03-29 |
 
 ---
 
