@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Provisioning & Onboarding
-current_phase: 05
+current_phase: 07
 current_plan: Not started
-status: planning
-last_updated: "2026-03-29T23:56:32.213Z"
+status: ready to plan
+last_updated: "2026-03-30T00:00:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -47,20 +47,15 @@ progress:
 
 ## Current Position
 
-Phase: 04 (hardening) — EXECUTING
-Plan: 1 of 2
 **Milestone:** v1.1 (Provisioning & Onboarding)
-**Current Phase:** 6 — Provisioning
+**Current Phase:** 7 — Setup & Onboarding
 **Current Plan:** Not started
 **Status:** Ready to plan
 
 **Progress Bar:**
 
 ```
-ROADMAP:    [████████████████████████████████] 100%
-PHASE 1:    [                                  ]   0%
-PHASE 2:    [                                  ]   0%
-PHASE 3:    [                                  ]   0%
+[█████████████████░░░] 18/21 plans (86%)
 ```
 
 ---
@@ -134,19 +129,17 @@ None currently. Stack is well-charted. Research confidence is MEDIUM overall, de
 
 ## Session Continuity
 
-**Last Session:** 2026-03-29T23:17:52.013Z
+**Last Session:** 2026-03-30
 
-- Phase 5 (Board Status) executed: 3 plans across 2 waves
-- Created tools/webrepl_cmd.py, tools/board_status.py, tools/mdns_discovery.py
-- Wired 3 new MCP tools (14 total): get_board_status, check_board_health, discover_boards
-- 20 new tests (76 total), verification passed
-- zeroconf dependency added
+- Phase 4 (Hardening) ROADMAP sync: marked complete (was executed previously but tracking was out of sync)
+- Phase 4 delivered: DTR/RTS hard reset, explicit --chip enforcement, tech debt cleanup (flaky test, stale service comment, Phase 3 tool assertions)
+- Phases 4, 5, 6 all complete — v1.1 milestone is 7/10 plans done
 
-**Next Session:** Phase 6 planning (Provisioning)
+**Next Session:** Phase 7 — Setup & Onboarding
 
-- Discuss phase context and approach
-- Plan always-erase flash, WiFi credential management, boot.py deployment
+- 3 plans: test scaffolds, setup.sh script, README update
+- Run `/gsd:plan-phase 7` to plan
 
 ---
 
-**Last Updated:** 2026-03-29
+**Last Updated:** 2026-03-30

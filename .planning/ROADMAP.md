@@ -25,8 +25,8 @@
 
 **Milestone Goal:** Seamless path from raw/used ESP32 to running code, reliable resets, one-command Pi setup, and v1.0 tech debt cleanup.
 
-- [ ] **Phase 4: Hardening** - Fix v1.0 tech debt and make resets reliable
-- [ ] **Phase 5: Board Status** - Query board health, firmware, WiFi, and resource usage
+- [x] **Phase 4: Hardening** - Fix v1.0 tech debt and make resets reliable (completed 2026-03-30)
+- [x] **Phase 5: Board Status** - Query board health, firmware, WiFi, and resource usage (completed 2026-03-29)
 - [x] **Phase 6: Provisioning** - Always-erase flash, WiFi config deployment, clear user guidance (completed 2026-03-29)
 - [ ] **Phase 7: Setup & Onboarding** - One-command Pi setup script and MCP registration docs
 
@@ -42,10 +42,10 @@
   3. Every esptool subprocess call passes an explicit --chip flag (no auto-detect anywhere in codebase)
   4. All existing tests pass, including the fixed test_detect_chip_success and Phase 3 tool assertions
   5. The systemd service file has no stale planning comments
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 04-01-PLAN.md -- Fix tech debt: flaky test, stale service comment, missing Phase 3 tool assertions
-- [ ] 04-02-PLAN.md -- Reliability: DTR/RTS hardware reset, fallback message, --chip enforcement on all esptool calls
+- [x] 04-02-PLAN.md -- Reliability: DTR/RTS hardware reset, fallback message, --chip enforcement on all esptool calls
 
 ### Phase 5: Board Status
 **Goal**: Claude can check whether a board is alive, what firmware it runs, and its resource state -- without the user running REPL commands manually
@@ -99,7 +99,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7
 | 1. Foundation & Infrastructure | v1.0 | 4/4 | Complete | 2026-03-28 |
 | 2. Core USB Workflows | v1.0 | 3/3 | Complete | 2026-03-29 |
 | 3. WiFi & Advanced | v1.0 | 4/4 | Complete | 2026-03-29 |
-| 4. Hardening | v1.1 | 1/2 | In Progress | - |
+| 4. Hardening | v1.1 | 2/2 | Complete | 2026-03-30 |
 | 5. Board Status | v1.1 | 3/3 | Complete | 2026-03-29 |
 | 6. Provisioning | v1.1 | 2/2 | Complete   | 2026-03-29 |
 | 7. Setup & Onboarding | v1.1 | 0/3 | Not started | - |
