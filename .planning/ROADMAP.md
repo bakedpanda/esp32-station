@@ -47,10 +47,11 @@
 ### Phase 5: Board Status
 **Goal**: Claude can check whether a board is alive, what firmware it runs, and its resource state -- without the user running REPL commands manually
 **Depends on**: Phase 4 (reliable resets needed for consistent board queries)
-**Requirements**: STAT-01, STAT-02
+**Requirements**: STAT-01, STAT-02, STAT-03
 **Success Criteria** (what must be TRUE):
   1. MCP tool returns firmware version, WiFi connection status, IP address, free memory, and free storage for a connected board
   2. MCP tool detects whether MicroPython is running and the board is responsive, reporting clear issues if not
+  3. MCP tool discovers MicroPython boards on the local network via mDNS and returns their IP addresses
 **Plans**: TBD
 
 ### Phase 6: Provisioning
@@ -60,7 +61,7 @@
 **Success Criteria** (what must be TRUE):
   1. Every firmware flash automatically performs a full erase before writing -- no partial flash states possible
   2. WiFi credentials are stored in a Pi-local file and never appear in MCP tool calls or logs
-  3. Claude can deploy a boot.py with WiFi and WebREPL config to a board, reading credentials from the Pi-local file
+  3. Claude can deploy a boot.py with WiFi, WebREPL, and mDNS advertisement config to a board, reading credentials from the Pi-local file
   4. Every step requiring physical user action (BOOT button, power cycle) includes an explanation of what to do and why
   5. Tools remain separate and chainable -- Claude asks the user what readiness level they want and chains accordingly
 **Plans**: TBD
