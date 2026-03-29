@@ -95,7 +95,10 @@ def deploy_file_to_board(port: str, local_path: str, remote_path: str | None = N
     """
     try:
         with SerialLock(port):
-            return deploy_file(port, local_path, remote_path)
+            result = deploy_file(port, local_path, remote_path)
+            if "error" not in result:
+                soft_reset(port)
+            return result
     except TimeoutError as e:
         return {"error": "serial_lock_timeout", "detail": str(e)}
 
@@ -117,7 +120,10 @@ def deploy_directory_to_board(port: str, local_dir: str) -> dict:
     """
     try:
         with SerialLock(port):
-            return deploy_directory(port, local_dir)
+            result = deploy_directory(port, local_dir)
+            if "error" not in result:
+                soft_reset(port)
+            return result
     except TimeoutError as e:
         return {"error": "serial_lock_timeout", "detail": str(e)}
 
@@ -235,7 +241,10 @@ def pull_and_deploy_github(
     """
     try:
         with SerialLock(port):
-            return _pull_and_deploy_github(port, repo_url, branch, token)
+            result = _pull_and_deploy_github(port, repo_url, branch, token)
+            if "error" not in result:
+                soft_reset(port)
+            return result
     except TimeoutError as e:
         return {"error": "serial_lock_timeout", "detail": str(e)}
 
