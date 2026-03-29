@@ -15,10 +15,10 @@ Requirements for the Provisioning & Onboarding milestone.
 
 ### Provisioning
 
-- [ ] **PROV-01**: Every firmware flash starts with a full erase (no firmware detection needed)
+- [x] **PROV-01**: Every firmware flash starts with a full erase (no firmware detection needed)
 - [x] **PROV-02**: User can deploy WiFi + WebREPL config (boot.py) to a board, with credentials read from the Pi-local file
-- [ ] **PROV-03**: Every step requiring user action (BOOT button hold, erase progress, power cycle) includes a clear explanation of what to do and why
-- [ ] **PROV-04**: Tools remain separate so Claude can chain them; for batch prep Claude asks the user what readiness level they want per board
+- [x] **PROV-03**: Every step requiring user action (BOOT button hold, erase progress, power cycle) includes a clear explanation of what to do and why
+- [x] **PROV-04**: Tools remain separate so Claude can chain them; for batch prep Claude asks the user what readiness level they want per board
 
 ### Reliability
 
@@ -64,10 +64,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SETUP-01 | Phase 7 | Pending |
 | SETUP-02 | Phase 6 | Complete |
 | SETUP-03 | Phase 7 | Pending |
-| PROV-01 | Phase 6 | Pending |
+| PROV-01 | Phase 6 | Complete |
 | PROV-02 | Phase 6 | Complete |
-| PROV-03 | Phase 6 | Pending |
-| PROV-04 | Phase 6 | Pending |
+| PROV-03 | Phase 6 | Complete |
+| PROV-04 | Phase 6 | Complete |
 | REL-01 | Phase 4 | Pending |
 | REL-02 | Phase 4 | Pending |
 | REL-03 | Phase 4 | Pending |

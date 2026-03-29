@@ -27,7 +27,7 @@
 
 - [ ] **Phase 4: Hardening** - Fix v1.0 tech debt and make resets reliable
 - [ ] **Phase 5: Board Status** - Query board health, firmware, WiFi, and resource usage
-- [ ] **Phase 6: Provisioning** - Always-erase flash, WiFi config deployment, clear user guidance
+- [x] **Phase 6: Provisioning** - Always-erase flash, WiFi config deployment, clear user guidance (completed 2026-03-29)
 - [ ] **Phase 7: Setup & Onboarding** - One-command Pi setup script and MCP registration docs
 
 ## Phase Details
@@ -71,10 +71,10 @@ Plans:
   3. Claude can deploy a boot.py with WiFi, WebREPL, and mDNS advertisement config to a board, reading credentials from the Pi-local file
   4. Every step requiring physical user action (BOOT button, power cycle) includes an explanation of what to do and why
   5. Tools remain separate and chainable -- Claude asks the user what readiness level they want and chains accordingly
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 06-01-PLAN.md -- Credentials utility (load_credentials) and boot.py template with WiFi + WebREPL + hostname
-- [ ] 06-02-PLAN.md -- Wire deploy_boot_config MCP tool, update flash docstring for always-erase, add user_action guidance
+- [x] 06-02-PLAN.md -- Wire deploy_boot_config MCP tool, update flash docstring for always-erase, add user_action guidance
 
 ### Phase 7: Setup & Onboarding
 **Goal**: A new user can go from bare Pi to working dev station with one script and clear documentation
@@ -97,7 +97,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7
 | 3. WiFi & Advanced | v1.0 | 4/4 | Complete | 2026-03-29 |
 | 4. Hardening | v1.1 | 1/2 | In Progress | - |
 | 5. Board Status | v1.1 | 3/3 | Complete | 2026-03-29 |
-| 6. Provisioning | v1.1 | 1/2 | In Progress | - |
+| 6. Provisioning | v1.1 | 2/2 | Complete   | 2026-03-29 |
 | 7. Setup & Onboarding | v1.1 | 0/? | Not started | - |
 
 ---
