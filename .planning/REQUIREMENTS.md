@@ -28,8 +28,8 @@ Requirements for the Provisioning & Onboarding milestone.
 
 ### Board Status
 
-- [ ] **STAT-01**: MCP tool returns board status: firmware version, WiFi connected (y/n), IP address, free memory/storage
-- [ ] **STAT-02**: Board health check detects whether MicroPython is running, board is responsive, and reports any issues
+- [x] **STAT-01**: MCP tool returns board status: firmware version, WiFi connected (y/n), IP address, free memory/storage
+- [x] **STAT-02**: Board health check detects whether MicroPython is running, board is responsive, and reports any issues
 - [x] **STAT-03**: MCP tool discovers MicroPython boards on the local network via mDNS and returns their IP addresses
 
 ### Tech Debt
@@ -71,8 +71,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REL-01 | Phase 4 | Pending |
 | REL-02 | Phase 4 | Pending |
 | REL-03 | Phase 4 | Pending |
-| STAT-01 | Phase 5 | Pending |
-| STAT-02 | Phase 5 | Pending |
+| STAT-01 | Phase 5 | Complete |
+| STAT-02 | Phase 5 | Complete |
 | STAT-03 | Phase 5 | Complete |
 | DEBT-01 | Phase 4 | Complete |
 | DEBT-02 | Phase 4 | Complete |
