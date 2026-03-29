@@ -60,8 +60,8 @@ Plans:
 **Plans:** 1/3 plans executed
 
 Plans:
-- [x] 02-01-PLAN.md — File deployment: deploy_file/deploy_directory via mpremote, space check, integrity verify
-- [ ] 02-02-PLAN.md — REPL + board reset: exec_repl, read_serial, soft_reset, hard_reset via mpremote
+- [ ] 02-01-PLAN.md — File deployment: deploy_file/deploy_directory via mpremote, space check, integrity verify
+- [x] 02-02-PLAN.md — REPL + board reset: exec_repl, read_serial, soft_reset, hard_reset via mpremote
 - [ ] 02-03-PLAN.md — MCP wiring + serialization: SerialLock per-port, 5 new tools registered, error code audit
 
 ---
