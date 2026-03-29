@@ -14,6 +14,8 @@ from tools.file_deploy import deploy_file, deploy_directory
 from tools.firmware_flash import flash_firmware
 from tools.repl import exec_repl, read_serial, soft_reset, hard_reset
 from tools.serial_lock import SerialLock
+from tools.ota_wifi import deploy_ota_wifi as _deploy_ota_wifi
+from tools.github_deploy import pull_and_deploy_github as _pull_and_deploy_github
 
 mcp = FastMCP("esp32-station", host="0.0.0.0", port=8000)
 
@@ -182,6 +184,58 @@ def reset_board(port: str, reset_type: str = "soft") -> dict:
             if reset_type == "soft":
                 return soft_reset(port)
             return hard_reset(port)
+    except TimeoutError as e:
+        return {"error": "serial_lock_timeout", "detail": str(e)}
+
+
+@mcp.tool()
+def deploy_ota_wifi(host: str, local_path: str, remote_path: str, password: str) -> dict:
+    """Deploy a file to an ESP32 board over WiFi using WebREPL.
+
+    Transfers a single file from the Pi to the board using the webrepl_cli.py script.
+    The board must have WebREPL pre-configured (webrepl_cfg.py present, WebREPL enabled).
+
+    No SerialLock applied — this is a WiFi operation with no serial port.
+    If WiFi is unavailable, use deploy_file_to_board() instead (USB fallback).
+
+    Returns {"port": host, "files_written": [remote_path], "transport": "wifi"} on success.
+    Returns {"error": "wifi_unreachable", "detail": ..., "fallback": "use deploy_file_to_board"}
+             when the board cannot be reached over WiFi.
+    Returns {"error": error_code, "detail": ...} on other failures.
+
+    Args:
+        host:        Board's WiFi IP address or hostname, e.g. "192.168.1.42" or "esp32.local"
+        local_path:  Absolute path to local file to upload (max 200KB)
+        remote_path: Destination path on board, e.g. "/main.py"
+        password:    WebREPL password (passed through to subprocess; never stored)
+    """
+    return _deploy_ota_wifi(host, local_path, remote_path, password)
+
+
+@mcp.tool()
+def pull_and_deploy_github(
+    port: str, repo_url: str, branch: str = "main", token: str | None = None
+) -> dict:
+    """Pull the latest code from a GitHub repository and deploy it to a board via USB.
+
+    Clones the repository (shallow, --depth 1) into a temporary directory on the Pi,
+    then deploys the contents using deploy_directory() — the same pipeline as
+    deploy_directory_to_board() including space checks, exclusions, and integrity checks.
+
+    Uses SerialLock to serialize USB access — safe to call concurrently for different ports.
+
+    Returns {"port": port, "files_written": [...]} on success.
+    Returns {"error": error_code, "detail": ...} on failure.
+
+    Args:
+        port:     Serial port path, e.g. "/dev/ttyUSB0"
+        repo_url: GitHub repository URL, e.g. "https://github.com/user/esp32-project"
+        branch:   Branch to deploy (default: "main")
+        token:    Optional personal access token for private repos (never stored by this tool)
+    """
+    try:
+        with SerialLock(port):
+            return _pull_and_deploy_github(port, repo_url, branch, token)
     except TimeoutError as e:
         return {"error": "serial_lock_timeout", "detail": str(e)}
 
