@@ -58,7 +58,7 @@ Plans:
 **Plans:** 3 plans
 Plans:
 - [ ] 05-01-PLAN.md -- Board status collection and health check with dual USB/WiFi transport
-- [ ] 05-02-PLAN.md -- mDNS discovery of MicroPython boards via python-zeroconf
+- [x] 05-02-PLAN.md -- mDNS discovery of MicroPython boards via python-zeroconf
 - [ ] 05-03-PLAN.md -- Wire 3 new tools into MCP server and update registration tests
 
 ### Phase 6: Provisioning
