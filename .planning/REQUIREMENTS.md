@@ -34,9 +34,9 @@ Requirements for the Provisioning & Onboarding milestone.
 
 ### Tech Debt
 
-- [ ] **DEBT-01**: Fix `test_detect_chip_success` for read-only filesystem (patch BOARDS_JSON in test)
-- [ ] **DEBT-02**: Remove stale planning comment from `esp32-station.service` line 1
-- [ ] **DEBT-03**: Add Phase 3 tool assertions to `test_new_tools_registered`
+- [x] **DEBT-01**: Fix `test_detect_chip_success` for read-only filesystem (patch BOARDS_JSON in test)
+- [x] **DEBT-02**: Remove stale planning comment from `esp32-station.service` line 1
+- [x] **DEBT-03**: Add Phase 3 tool assertions to `test_new_tools_registered`
 
 ## Future Requirements
 
@@ -74,9 +74,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STAT-01 | Phase 5 | Pending |
 | STAT-02 | Phase 5 | Pending |
 | STAT-03 | Phase 5 | Pending |
-| DEBT-01 | Phase 4 | Pending |
-| DEBT-02 | Phase 4 | Pending |
-| DEBT-03 | Phase 4 | Pending |
+| DEBT-01 | Phase 4 | Complete |
+| DEBT-02 | Phase 4 | Complete |
+| DEBT-03 | Phase 4 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 16 total
