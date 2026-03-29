@@ -14,7 +14,7 @@ All capabilities are exposed as MCP tools — Claude calls them directly, no cop
 
 ## Requirements
 
-- Linux machine running Python 3.10+ (Raspberry Pi, ARM SBCs, or low-power x86)
+- Linux machine running Python 3.10+ (Raspberry Pi, ARM SBCs, or x86)
 - systemd
 - ESP32 board(s) connected via USB
 - Claude Code on your main machine with MCP configured
