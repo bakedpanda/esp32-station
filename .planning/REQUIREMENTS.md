@@ -9,7 +9,7 @@
 
 - [x] **BOARD-01**: Claude can list all ESP32 boards currently connected via USB
 - [x] **BOARD-02**: Claude can identify the chip variant of a connected board (ESP32, S2, S3, C3, C6)
-- [ ] **BOARD-03**: Claude can reset a board (soft reset and hard reset)
+- [x] **BOARD-03**: Claude can reset a board (soft reset and hard reset)
 - [x] **BOARD-04**: Board state is persisted across MCP server restarts
 
 ### Firmware Flashing
@@ -30,9 +30,9 @@
 
 ### REPL & Serial Access
 
-- [ ] **REPL-01**: Claude can execute a MicroPython command on a board and capture the output
-- [ ] **REPL-02**: Claude can read recent serial output from a board
-- [ ] **REPL-03**: REPL commands time out cleanly (no blocking hangs)
+- [x] **REPL-01**: Claude can execute a MicroPython command on a board and capture the output
+- [x] **REPL-02**: Claude can read recent serial output from a board
+- [x] **REPL-03**: REPL commands time out cleanly (no blocking hangs)
 
 ### MCP Server
 
@@ -82,7 +82,7 @@
 |-------------|-------|--------|
 | BOARD-01 | Phase 1 | Complete |
 | BOARD-02 | Phase 1 | Complete |
-| BOARD-03 | Phase 2 | Pending |
+| BOARD-03 | Phase 2 | Complete |
 | BOARD-04 | Phase 1 | Complete |
 | FLASH-01 | Phase 1 | Complete |
 | FLASH-02 | Phase 1 | Complete |
@@ -94,9 +94,9 @@
 | DEPLOY-03 | Phase 2 | Pending |
 | DEPLOY-04 | Phase 2 | Pending |
 | DEPLOY-05 | Phase 3 | Pending |
-| REPL-01 | Phase 2 | Pending |
-| REPL-02 | Phase 2 | Pending |
-| REPL-03 | Phase 2 | Pending |
+| REPL-01 | Phase 2 | Complete |
+| REPL-02 | Phase 2 | Complete |
+| REPL-03 | Phase 2 | Complete |
 | MCP-01 | Phase 1 | Complete |
 | MCP-02 | Phase 1 | Complete |
 | MCP-03 | Phase 1 | Complete |
