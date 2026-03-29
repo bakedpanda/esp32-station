@@ -12,7 +12,7 @@ from mcp.server.fastmcp import FastMCP
 from tools.board_detection import detect_chip, list_boards, load_board_state
 from tools.firmware_flash import flash_firmware
 
-mcp = FastMCP("esp32-station")
+mcp = FastMCP("esp32-station", host="0.0.0.0", port=8000)
 
 
 @mcp.tool()
@@ -73,6 +73,4 @@ def get_board_state() -> dict:
 
 
 if __name__ == "__main__":
-    # CRITICAL: host="0.0.0.0" — bind to all interfaces so Claude on main machine can reach this
-    # CRITICAL: transport="streamable-http" — SSE is deprecated; use Streamable HTTP
-    mcp.run(transport="streamable-http", host="0.0.0.0", port=8000)
+    mcp.run(transport="streamable-http")
