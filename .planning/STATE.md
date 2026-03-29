@@ -47,10 +47,8 @@ progress:
 
 ## Current Position
 
-Phase: 02 (core-usb-workflows) — EXECUTING
-Plan: 3 of 3
-**Milestone:** v1 (Core USB + MCP)
-**Current Phase:** Planning (roadmap approval pending)
+**Milestone:** v1.1 (Provisioning & Onboarding)
+**Current Phase:** 6 — Provisioning
 **Current Plan:** Not started
 **Status:** Ready to plan
 
@@ -133,22 +131,19 @@ None currently. Stack is well-charted. Research confidence is MEDIUM overall, de
 
 ## Session Continuity
 
-**Last Session:** 2026-03-29T19:48:38.637Z
+**Last Session:** 2026-03-29
 
-- Analyzed 24 v1 requirements
-- Derived 3-phase structure from research recommendations
-- Validated 100% coverage (no orphans)
-- Created ROADMAP.md with success criteria
-- Created STATE.md (this file)
-- Ready for Phase 1 planning
+- Phase 5 (Board Status) executed: 3 plans across 2 waves
+- Created tools/webrepl_cmd.py, tools/board_status.py, tools/mdns_discovery.py
+- Wired 3 new MCP tools (14 total): get_board_status, check_board_health, discover_boards
+- 20 new tests (76 total), verification passed
+- zeroconf dependency added
 
-**Next Session:** Phase 1 planning
+**Next Session:** Phase 6 planning (Provisioning)
 
-- Decompose Phase 1 goal into executable plans
-- Identify must-haves vs. nice-to-haves
-- Estimate effort per plan
-- Create PLAN-01.md documents
+- Discuss phase context and approach
+- Plan always-erase flash, WiFi credential management, boot.py deployment
 
 ---
 
-**Last Updated:** 2026-03-28
+**Last Updated:** 2026-03-29
