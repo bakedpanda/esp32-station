@@ -98,7 +98,8 @@ def detect_chip(port: str) -> dict:
         return {"error": "chip_id_failed", "detail": f"'{ESPTOOL_CMD}' not found — is esptool v5 installed in the venv?"}
 
     if result.returncode != 0:
-        return {"error": "chip_id_failed", "detail": result.stderr.strip()}
+        detail = result.stderr.strip() or result.stdout.strip() or "esptool exited with no output"
+        return {"error": "chip_id_failed", "detail": detail}
 
     # Parse chip type from esptool output.
     # v5 format: "Chip type:          ESP32-D0WD (revision v1.0)"

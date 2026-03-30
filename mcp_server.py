@@ -40,12 +40,17 @@ def list_connected_boards() -> list[dict]:
 def identify_chip(port: str) -> dict:
     """Detect the ESP32 chip variant at the given serial port.
 
-    Runs esptool chip_id as a subprocess. Updates board state on success.
+    Runs esptool chip-id as a subprocess. Updates board state on success.
     Returns {"port": port, "chip": chip_name} on success.
     Returns {"error": "chip_id_failed"|"chip_not_parsed", "detail": ...} on failure.
 
+    If this fails for a board on /dev/ttyACM0 (native USB, VID 0x303a):
+    The board needs to be in bootloader mode for esptool to connect.
+    Tell the user to hold the BOOT button and press RESET (or power cycle while
+    holding BOOT), then retry identify_chip immediately.
+
     Args:
-        port: Serial port path, e.g. "/dev/ttyUSB0"
+        port: Serial port path, e.g. "/dev/ttyUSB0" or "/dev/ttyACM0"
     """
     return detect_chip(port)
 
