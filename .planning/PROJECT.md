@@ -24,8 +24,8 @@ Claude can flash, deploy, and debug any connected ESP32 without the user having 
 
 ## Current State
 
-Shipped v1.0 MVP with 2,446 LOC Python across 14 MCP tools. All 24 v1 requirements satisfied.
-Phase 6 complete — provisioning workflow with credentials utility, boot.py template deployment, and user guidance. 15 MCP tools total. deploy_boot_config deploys WiFi+WebREPL+hostname config from Pi-local credentials file. Flash always erases. BOOT button guidance proactive.
+v1.1 milestone complete — all 7 phases done. 15 MCP tools, 12 tool modules, full provisioning workflow, and one-command Pi onboarding.
+Phase 7 complete — setup.sh at repo root takes a fresh Pi from zero to running dev station (clone, virtualenv, pip deps, dialout group, WiFi credential prompt, credentials file, service install+start). README updated with all 15 tools, 12 architecture modules, and MCP registration instructions.
 Tech stack: FastMCP, esptool, mpremote, pyserial, webrepl_cli.py, zeroconf, git subprocess.
 Deployed on Raspberry Pi at 192.168.10.123 as systemd service.
 
@@ -43,7 +43,7 @@ Deployed on Raspberry Pi at 192.168.10.123 as systemd service.
 
 ### Active
 
-- [ ] One-command Pi setup script (clone, deps, WiFi credential prompts, systemd install)
+- [x] One-command Pi setup script (clone, deps, WiFi credential prompts, systemd install) — Validated in Phase 7: Setup & Onboarding
 - [x] WiFi credentials stored on Pi, read locally by MCP server — Validated in Phase 6: Provisioning
 - [x] Hard reset (DTR/RTS) as default post-deploy, with power-cycle fallback prompt — Validated in Phase 4: Hardening
 - [x] Always full-erase before flash — Validated in Phase 6: Provisioning
@@ -108,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-30 after Phase 4: Hardening completion (ROADMAP/STATE sync)*
+*Last updated: 2026-03-30 after Phase 7: Setup & Onboarding completion — v1.1 milestone complete*
