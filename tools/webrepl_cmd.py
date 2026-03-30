@@ -1,9 +1,20 @@
 """WebREPL command execution helper for ESP32 boards over WiFi.
 
 Executes MicroPython commands on boards via the WebREPL websocket protocol.
-Reads complete WebSocket frames (stripping headers) before scanning for
-markers, so multi-frame responses are handled correctly regardless of how
-MicroPython splits output across frames.
+Uses raw paste mode (MicroPython v1.14+) which provides device-side flow
+control and supports commands of any length. Falls back to legacy 64-byte
+chunked mode for older firmware (commands must be ≤255 bytes in that case).
+
+Raw paste mode protocol (after entering raw REPL with Ctrl-A):
+  1. Client sends \x05A
+  2. Board replies R\x00 + 2-byte little-endian window size
+  3. Client sends up to window bytes; waits for \x01 before each subsequent window
+  4. Client sends \x04 to trigger execution
+  5. Board replies OK<output>\x04<errors>\x04>
+
+Reference: https://github.com/micropython/micropython/issues/16997
+           MicroPython stdin ring buffer is 260 bytes (ports/esp32/mphalport.c);
+           commands >255 bytes in legacy mode overflow it silently.
 
 Requirements covered: STAT-01 (WiFi path), STAT-02 (WiFi path).
 """
@@ -36,7 +47,6 @@ def _ws_read_frame(sock) -> bytes:
     the socket is closed or no data arrives.
     """
     while True:
-        # Read 2-byte frame header
         header = b""
         while len(header) < 2:
             chunk = sock.recv(2 - len(header))
@@ -46,7 +56,6 @@ def _ws_read_frame(sock) -> bytes:
 
         fl, sz = struct.unpack(">BB", header)
 
-        # Extended 16-bit payload length
         if sz == 126:
             ext = b""
             while len(ext) < 2:
@@ -56,7 +65,6 @@ def _ws_read_frame(sock) -> bytes:
                 ext += chunk
             (sz,) = struct.unpack(">H", ext)
 
-        # Read payload
         payload = b""
         while len(payload) < sz:
             chunk = sock.recv(sz - len(payload))
@@ -64,25 +72,55 @@ def _ws_read_frame(sock) -> bytes:
                 break
             payload += chunk
 
-        # Accept text (0x81) and binary (0x82) frames; skip anything else
         if fl in (_FRAME_TXT, _FRAME_BIN):
             return payload
-        # Unknown frame type — discard and read the next one
 
 
-def _read_until(sock, marker: bytes, max_bytes: int = 8192) -> bytes:
-    """Accumulate decoded WebSocket frame payloads until marker is found.
+# ── Buffered reader ──────────────────────────────────────────────────────
 
-    Reads complete frames so that markers split across frame boundaries
-    are still detected correctly.
+class _Reader:
+    """Buffered byte reader over WebSocket frames.
+
+    Accumulates frame payloads into an internal buffer so callers can read
+    exact byte counts or scan for markers without losing bytes that arrived
+    in the same frame as other data. Required for raw paste mode where
+    flow-control bytes (\x01) and response bytes arrive in the same stream
+    as command output.
     """
-    buf = b""
-    while marker not in buf and len(buf) < max_bytes:
-        frame = _ws_read_frame(sock)
-        if not frame:
-            break
-        buf += frame
-    return buf
+
+    def __init__(self, sock):
+        self._sock = sock
+        self._buf = b""
+
+    def read(self, n: int) -> bytes:
+        """Read exactly n bytes, accumulating frames as needed."""
+        while len(self._buf) < n:
+            frame = _ws_read_frame(self._sock)
+            if not frame:
+                break
+            self._buf += frame
+        result = self._buf[:n]
+        self._buf = self._buf[n:]
+        return result
+
+    def read_until(self, marker: bytes, max_bytes: int = 8192) -> bytes:
+        """Accumulate frames until marker is found or max_bytes exceeded.
+
+        Returns bytes up to and including the marker; any bytes after the
+        marker are retained in the buffer for subsequent reads.
+        """
+        while marker not in self._buf and len(self._buf) < max_bytes:
+            frame = _ws_read_frame(self._sock)
+            if not frame:
+                break
+            self._buf += frame
+        idx = self._buf.find(marker)
+        if idx >= 0:
+            end = idx + len(marker)
+            result, self._buf = self._buf[:end], self._buf[end:]
+            return result
+        result, self._buf = self._buf, b""
+        return result
 
 
 # ── Handshake & login ────────────────────────────────────────────────────
@@ -111,30 +149,57 @@ def _client_handshake(sock):
 
 def _login(sock, password: str):
     """Read frames until 'Password: ' prompt appears, then send password."""
-    _read_until(sock, b"Password: ")
+    buf = b""
+    while b"Password: " not in buf:
+        frame = _ws_read_frame(sock)
+        if not frame:
+            break
+        buf += frame
     _ws_write_frame(sock, password.encode("utf-8") + b"\r", _FRAME_TXT)
 
 
 # ── Raw REPL execution ───────────────────────────────────────────────────
 
 def _exec_raw_repl(sock, command: str) -> str:
-    """Enter raw REPL, execute command, return output string."""
-    # Enter raw REPL (Ctrl-A)
-    _ws_write_frame(sock, b"\x01", _FRAME_TXT)
-    # Consume any post-login banner then wait for raw REPL prompt ">"
-    _read_until(sock, b">")
+    """Enter raw REPL, execute command, return output string.
 
-    # Send command in <=64-byte chunks to avoid extended-length WebSocket frames.
-    # MicroPython's WebREPL handles large binary frames (OTA uses 1024-byte chunks)
-    # but may not handle extended-length text frames (> 125 bytes) correctly.
+    Tries raw paste mode (MicroPython v1.14+) first: device-controlled flow
+    control supports commands of any size. Falls back to legacy 64-byte
+    chunked mode for older firmware (≤255 bytes only in that case).
+    """
+    reader = _Reader(sock)
+
+    # Enter raw REPL (Ctrl-A), wait for ">" prompt
+    _ws_write_frame(sock, b"\x01", _FRAME_TXT)
+    reader.read_until(b">")
+
     data = command.encode("utf-8")
-    for i in range(0, len(data), 64):
-        _ws_write_frame(sock, data[i:i + 64], _FRAME_TXT)
+
+    # Request raw paste mode (Ctrl-E + 'A')
+    _ws_write_frame(sock, b"\x05A", _FRAME_TXT)
+    response = reader.read(2)
+
+    if response == b"R\x00":
+        # Raw paste mode accepted — read 2-byte little-endian window size
+        window = struct.unpack("<H", reader.read(2))[0]
+        i = 0
+        while i < len(data):
+            chunk = data[i:i + window]
+            _ws_write_frame(sock, chunk, _FRAME_TXT)
+            i += len(chunk)
+            if i < len(data):
+                # Wait for \x01 flow-control byte before filling the window again
+                reader.read(1)
+    else:
+        # Fallback: legacy 64-byte chunked mode (works for commands ≤255 bytes)
+        for j in range(0, len(data), 64):
+            _ws_write_frame(sock, data[j:j + 64], _FRAME_TXT)
+
     # Ctrl-D triggers execution
     _ws_write_frame(sock, b"\x04", _FRAME_TXT)
 
     # Response format: OK<output>\x04<errors>\x04>
-    raw = _read_until(sock, b"\x04>")
+    raw = reader.read_until(b"\x04>")
     text = raw.decode("utf-8", errors="replace")
 
     ok_idx = text.find("OK")
