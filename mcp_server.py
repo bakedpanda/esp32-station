@@ -74,6 +74,12 @@ def flash_micropython(port: str, chip: str | None = None) -> dict:
        "[board description] flashing mode". Try the alternative process with the user.
        Once you find what works, call save_board_flash_notes to record it for next time.
 
+    POST-FLASH: After a successful flash, always:
+    1. Ask the user: "What would you like to call this board?" (e.g. "desk", "kitchen", "sensor1")
+    2. Build the hostname as: {name}-esp32-{id} where {id} is the first 6 characters of
+       the board's serial number from list_connected_boards (e.g. "desk-esp32-983dae")
+    3. Call deploy_boot_config with that hostname — do not skip this step.
+
     Firmware is cached locally (7-day TTL); network not required if cache is fresh.
     Pre-flight chip detection runs automatically if chip is not provided.
 
