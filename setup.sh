@@ -98,8 +98,9 @@ import json, sys
 data = {"ssid": sys.argv[1], "password": sys.argv[2], "webrepl_password": sys.argv[3]}
 print(json.dumps(data))
 ' "$WIFI_SSID" "$WIFI_PASSWORD" "$WEBREPL_PASSWORD" | sudo tee "$CREDS_PATH" > /dev/null
+    sudo chown "$USER:$USER" "$CREDS_PATH"
     sudo chmod 600 "$CREDS_PATH"
-    log "Credentials written. File permissions set to 600."
+    log "Credentials written. Owned by $USER, permissions set to 600."
     # Clear credential variables from environment immediately
     unset WIFI_SSID WIFI_PASSWORD WEBREPL_PASSWORD
 fi
