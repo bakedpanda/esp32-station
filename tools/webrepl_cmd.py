@@ -5,12 +5,14 @@ Uses raw paste mode (MicroPython v1.14+) which provides device-side flow
 control and supports commands of any length. Falls back to legacy 64-byte
 chunked mode for older firmware (commands must be ≤255 bytes in that case).
 
-Raw paste mode protocol (after entering raw REPL with Ctrl-A):
-  1. Client sends \x05A
-  2. Board replies R\x00 + 2-byte little-endian window size
-  3. Client sends up to window bytes; waits for \x01 before each subsequent window
-  4. Client sends \x04 to trigger execution
-  5. Board replies OK<output>\x04<errors>\x04>
+Raw paste mode protocol:
+  1. Ctrl-B  — ensure interactive REPL (exit stuck raw REPL from prior failed session)
+  2. Ctrl-A  — enter raw REPL; board replies with text banner ending ">"
+  3. Client sends \x05A\x01 — request raw paste mode
+  4. Board replies R\x01 + 2-byte little-endian window size + \x01 flow-control token
+  5. Client sends up to window bytes; waits for \x01 before each subsequent window
+  6. Client sends \x04 to trigger execution
+  7. Board replies \x04<output>\x04<errors>\x04>
 
 Reference: https://github.com/micropython/micropython/issues/16997
            MicroPython stdin ring buffer is 260 bytes (ports/esp32/mphalport.c);
@@ -152,7 +154,11 @@ def _client_handshake(sock):
 
 
 def _login(sock, password: str):
-    """Read frames until 'Password: ' prompt appears, then send password."""
+    """Read frames until 'Password: ' prompt appears, send password, drain banner.
+
+    Also drains the post-login banner ('\r\nWebREPL connected\r\n>>> ') so the
+    buffer is clean when _exec_raw_repl starts.
+    """
     buf = b""
     while b"Password: " not in buf:
         frame = _ws_read_frame(sock)
@@ -160,6 +166,13 @@ def _login(sock, password: str):
             break
         buf += frame
     _ws_write_frame(sock, password.encode("utf-8") + b"\r", _FRAME_TXT)
+    # Drain post-login banner (\r\nWebREPL connected\r\n>>> )
+    buf = b""
+    while b">>> " not in buf:
+        frame = _ws_read_frame(sock)
+        if not frame:
+            break
+        buf += frame
 
 
 # ── Raw REPL execution ───────────────────────────────────────────────────
@@ -167,43 +180,37 @@ def _login(sock, password: str):
 def _exec_raw_repl(sock, command: str) -> str:
     """Enter raw REPL, execute command, return output string.
 
-    MicroPython v1.20+ protocol: Ctrl-A directly enters raw paste mode,
-    responding with R\x01<window_lo><window_hi><flow_ctrl> (5 bytes).
-    Older firmware responds with the text banner "raw REPL; CTRL-B to exit\r\n>"
-    followed by raw paste negotiation via \x05A\x01.
+    Protocol (MicroPython v1.14+ on ESP32):
+      1. Ctrl-B  — exit raw REPL if a previous session left the board stuck there
+      2. Ctrl-A  — enter raw REPL; board replies with text banner ending in ">"
+      3. \x05A\x01 — request raw paste mode; board replies R\x01 + 2-byte window + \x01
+      4. Send command in window-sized chunks; board sends \x01 flow-control between each
+      5. \x04    — trigger execution
+      6. Response: \x04<stdout>\x04<stderr>\x04>  (raw paste format)
+
     Falls back to legacy 64-byte chunked mode if raw paste is unavailable.
     """
     reader = _Reader(sock)
     data = command.encode("utf-8")
 
-    # Enter raw REPL (Ctrl-A)
+    # Step 1: Ctrl-B — ensure interactive REPL (recovers from stuck raw REPL state)
+    _ws_write_frame(sock, b"\x02", _FRAME_TXT)
+    reader.read_until(b">>> ")
+
+    # Step 2: Ctrl-A — enter raw REPL; drain text banner to ">"
     _ws_write_frame(sock, b"\x01", _FRAME_TXT)
+    reader.read_until(b"raw REPL; CTRL-B to exit\r\n>")
 
-    # Read first 2 bytes to detect protocol version
-    head = reader.read(2)
-
-    if head[:1] == b"R":
-        # v1.20+ protocol: Ctrl-A directly entered raw paste mode
-        if head == b"R\x01":
-            # Accepted — read window size (2 bytes LE) + initial flow-control token
-            window = struct.unpack("<H", reader.read(2))[0]
-            reader.read(1)  # consume initial \x01 flow-control token
-        else:
-            # R\x00 = not supported; use legacy mode
-            window = 0
+    # Step 3: \x05A\x01 — request raw paste mode
+    _ws_write_frame(sock, b"\x05A\x01", _FRAME_TXT)
+    resp = reader.read(2)
+    if resp == b"R\x01":
+        window = struct.unpack("<H", reader.read(2))[0]
+        reader.read(1)  # consume initial \x01 flow-control token
     else:
-        # Old protocol: text banner. Put the 2 bytes back and drain to ">"
-        reader.unread(head)
-        reader.read_until(b"\r\n>")
-        # Request raw paste (Ctrl-E + 'A' + \x01)
-        _ws_write_frame(sock, b"\x05A\x01", _FRAME_TXT)
-        resp = reader.read(2)
-        if resp == b"R\x01":
-            window = struct.unpack("<H", reader.read(2))[0]
-            reader.read(1)  # initial flow-control token
-        else:
-            window = 0
+        window = 0
 
+    # Step 4: Send command
     if window:
         # Raw paste mode: send in window-sized chunks, wait for \x01 between each
         i = 0
@@ -218,16 +225,23 @@ def _exec_raw_repl(sock, command: str) -> str:
         for j in range(0, len(data), 64):
             _ws_write_frame(sock, data[j:j + 64], _FRAME_TXT)
 
-    # Ctrl-D triggers execution
+    # Step 5: Ctrl-D triggers execution
     _ws_write_frame(sock, b"\x04", _FRAME_TXT)
 
-    # Response format: OK<output>\x04<errors>\x04>
+    # Step 6: Parse response
+    # Raw paste format: \x04<stdout>\x04<stderr>\x04>
+    # Legacy format:    OK<stdout>\x04<errors>\x04>
     raw = reader.read_until(b"\x04>")
     text = raw.decode("utf-8", errors="replace")
 
     ok_idx = text.find("OK")
     if ok_idx >= 0:
+        # Legacy format: skip "OK" prefix
         text = text[ok_idx + 2:]
+    elif text.startswith("\x04"):
+        # Raw paste format: skip leading \x04 separator
+        text = text[1:]
+
     end_idx = text.find("\x04")
     if end_idx >= 0:
         text = text[:end_idx]
