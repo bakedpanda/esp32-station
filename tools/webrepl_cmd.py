@@ -124,8 +124,14 @@ def _exec_raw_repl(sock, command: str) -> str:
     # Consume any post-login banner then wait for raw REPL prompt ">"
     _read_until(sock, b">")
 
-    # Send command + Ctrl-D
-    _ws_write_frame(sock, command.encode("utf-8") + b"\x04", _FRAME_TXT)
+    # Send command in <=64-byte chunks to avoid extended-length WebSocket frames.
+    # MicroPython's WebREPL handles large binary frames (OTA uses 1024-byte chunks)
+    # but may not handle extended-length text frames (> 125 bytes) correctly.
+    data = command.encode("utf-8")
+    for i in range(0, len(data), 64):
+        _ws_write_frame(sock, data[i:i + 64], _FRAME_TXT)
+    # Ctrl-D triggers execution
+    _ws_write_frame(sock, b"\x04", _FRAME_TXT)
 
     # Response format: OK<output>\x04<errors>\x04>
     raw = _read_until(sock, b"\x04>")
