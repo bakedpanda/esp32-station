@@ -101,7 +101,7 @@ Mark each item `[x]` as you go. Note failures with the actual error.
 
 **Notes:**
 - G1: `mpremote exec` uses raw REPL — expressions don't auto-print; `print(1+1)` → `2` as expected. UAT wording updated mentally: pass with `print()` wrapper.
-- G3: Tool functions correctly (no crash, structured response), but `mpremote exec ""` interrupts the board to enter raw REPL, discarding any buffered serial history and stopping background output. In practice `read_board_serial` only captures output produced by code running within the mpremote exec window — an empty command produces none. Design limitation, not a bug. Marked pass on structural correctness.
+- G3: Fixed post-UAT. Original `mpremote exec ""` approach interrupted the board and never captured anything. Replaced with direct pyserial read (no raw REPL entry). Now captures live output from autonomously running boards correctly. Note: `exec_repl_command` sends Ctrl+C which kills timers — that is expected mpremote behaviour, not a G3 issue.
 - G5: Parameter is `reset_type` (not `method`) — returns `{"reset": "hard"}` correctly.
 
 ---
