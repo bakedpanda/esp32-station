@@ -78,12 +78,13 @@ fi
 
 if [ "$SKIP_CREDS" -eq 0 ]; then
     echo ""
-    echo "Enter WiFi and WebREPL credentials (will be written to $CREDS_PATH)."
+    echo "Enter WiFi credentials (will be written to $CREDS_PATH)."
     read -rp  "WiFi SSID: " WIFI_SSID </dev/tty
     read -rsp "WiFi password: " WIFI_PASSWORD </dev/tty
     echo
-    read -rsp "WebREPL password (for over-WiFi REPL access): " WEBREPL_PASSWORD </dev/tty
-    echo
+    # Generate a random WebREPL password — user can look it up in /etc/esp32-station/wifi.json if needed
+    WEBREPL_PASSWORD=$("$VENV/bin/python3" -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12)))")
+    log "WebREPL password generated automatically."
 fi
 
 # ---------------------------------------------------------------------------
@@ -146,6 +147,9 @@ echo "   claude mcp add --transport http esp32-station http://${HOSTNAME}.local:
 echo ""
 echo " If hostname resolution fails, replace ${HOSTNAME}.local with the Pi's IP address."
 echo " Find it with: hostname -I"
+echo ""
+echo " WebREPL password was generated automatically."
+echo " To look it up: sudo cat $CREDS_PATH"
 echo ""
 echo " Next: restart your terminal session (for dialout group to take effect)."
 echo "============================================================"
