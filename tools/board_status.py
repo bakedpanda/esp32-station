@@ -44,6 +44,16 @@ firmware = '.'.join(str(x) for x in sys.version_info[:3])
 print(json.dumps({"firmware": firmware, "wifi_connected": wifi_connected, "ip_address": ip_address, "free_memory": free_memory, "free_storage": free_storage, "board": board}))
 """
 
+# WiFi-specific script: must stay ≤256 bytes (MicroPython raw REPL input buffer limit).
+# Uses os.uname()[2] for firmware (MicroPython release, e.g. "1.24.0"), WLAN(0) shorthand,
+# and omits gc/free_memory to stay within budget. All other keys match STATUS_SCRIPT.
+STATUS_SCRIPT_WIFI = (
+    'import json,network,os;W=network.WLAN(0);c=W.isconnected();s=os.statvfs("/");'
+    'print(json.dumps({"firmware":os.uname()[2],"wifi_connected":c,'
+    '"ip_address":W.ifconfig()[0]if c else"",'
+    '"board":W.config("dhcp_hostname"),"free_storage":s[0]*s[3]}))'
+)
+
 HEALTH_PING = "print(1)"
 HEALTH_TIMEOUT = 5
 
@@ -90,7 +100,7 @@ def get_status(port=None, host=None, password=None) -> dict:
             if "error" in creds:
                 return creds
             password = creds["webrepl_password"]
-        result = webrepl_exec(host, password, STATUS_SCRIPT, timeout=15)
+        result = webrepl_exec(host, password, STATUS_SCRIPT_WIFI, timeout=15)
         transport = "wifi"
 
     if "error" in result:
