@@ -28,7 +28,8 @@
 - [x] **Phase 4: Hardening** - Fix v1.0 tech debt and make resets reliable (completed 2026-03-30)
 - [x] **Phase 5: Board Status** - Query board health, firmware, WiFi, and resource usage (completed 2026-03-29)
 - [x] **Phase 6: Provisioning** - Always-erase flash, WiFi config deployment, clear user guidance (completed 2026-03-29)
-- [ ] **Phase 7: Setup & Onboarding** - One-command Pi setup script and MCP registration docs
+- [x] **Phase 7: Setup & Onboarding** - One-command Pi setup script and MCP registration docs
+- [ ] **Phase 8: End-to-End UAT** - Full manual validation on real hardware: all 15 MCP tools, provisioning workflow, and fresh Pi install via setup.sh
 
 ## Phase Details
 
@@ -89,10 +90,22 @@ Plans:
 - [x] 07-02-PLAN.md -- Write setup.sh: idempotent Pi onboarding script (SETUP-01)
 - [x] 07-03-PLAN.md -- Update README.md: 15 tools table, 12 architecture modules, setup.sh reference, MCP registration (SETUP-03)
 
+### Phase 8: End-to-End UAT
+**Goal**: Every MCP tool is validated on real hardware; setup.sh is proven on a fresh Pi; the full provisioning workflow (erase → flash → WiFi → deploy) works end-to-end
+**Depends on**: Phase 7 (setup.sh and README complete)
+**Requirements**: SETUP-01, SETUP-03, all v1.1 requirements
+**Success Criteria** (what must be TRUE):
+  1. All 15 MCP tools exercised from Claude Code on the main machine via the live Pi server
+  2. Full provisioning workflow confirmed: erase, flash firmware, deploy WiFi credentials, deploy boot.py, deploy code from GitHub
+  3. setup.sh runs successfully on a fresh Pi (clean OS, nothing pre-installed) and leaves a working MCP server
+  4. setup.sh re-run on an existing Pi is idempotent (no duplicate entries, no errors)
+  5. MCP server registration (`claude mcp add --transport http`) works from main machine
+**Plans:** 0 plans (manual UAT phase — plans created during /gsd:discuss-phase 8)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 -> 5 -> 6 -> 7
+Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -102,8 +115,9 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7
 | 4. Hardening | v1.1 | 2/2 | Complete | 2026-03-30 |
 | 5. Board Status | v1.1 | 3/3 | Complete | 2026-03-29 |
 | 6. Provisioning | v1.1 | 2/2 | Complete   | 2026-03-29 |
-| 7. Setup & Onboarding | v1.1 | 2/3 | In Progress|  |
+| 7. Setup & Onboarding | v1.1 | 3/3 | Complete | 2026-03-30 |
+| 8. End-to-End UAT | v1.1 | 0/0 | Planned | - |
 
 ---
 
-**Last Updated:** 2026-03-30 -- Phase 7 planned (3 plans)
+**Last Updated:** 2026-03-30 -- Phase 8 added (end-to-end UAT)
