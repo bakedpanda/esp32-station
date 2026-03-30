@@ -128,9 +128,17 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8
 
 ### Phase 999.1: Rename GitHub repo from ESP32-server to esp32-station (BACKLOG)
 
-**Goal:** Standardize the project name — `esp32-station` is used 49 times across 15 files (service name, MCP name, paths, tests); `ESP32-server` appears only 5 times in GitHub clone URLs. Rename the repo on GitHub, then update the 5 URL references in README.md and setup.sh.
+**Goal:** Standardize the project name — `esp32-station` is used 49 times across 15 files (service name, MCP name, paths, tests); `ESP32-server` appears only 5 times in GitHub clone URLs.
 **Requirements:** TBD
 **Plans:** 0 plans
+
+**Approach:**
+1. Copy (not move) `/mnt/anton/Claude/ESP32-server` → `/mnt/anton/Claude/esp32-station`
+2. Copy Claude Code memory: `cp -r ~/.claude/projects/-mnt-anton-Claude-ESP32-server ~/.claude/projects/-mnt-anton-Claude-esp32-station`
+3. Work from the new folder — old folder stays as backup
+4. Rename GitHub repo (Settings → Rename to esp32-station)
+5. Update the 5 clone URLs in README.md and setup.sh
+6. Delete old folder once stable
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
