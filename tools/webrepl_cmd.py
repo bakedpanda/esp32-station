@@ -122,6 +122,10 @@ class _Reader:
         result, self._buf = self._buf, b""
         return result
 
+    def unread(self, data: bytes) -> None:
+        """Push bytes back to the front of the buffer."""
+        self._buf = data + self._buf
+
 
 # ── Handshake & login ────────────────────────────────────────────────────
 
@@ -163,37 +167,54 @@ def _login(sock, password: str):
 def _exec_raw_repl(sock, command: str) -> str:
     """Enter raw REPL, execute command, return output string.
 
-    Tries raw paste mode (MicroPython v1.14+) first: device-controlled flow
-    control supports commands of any size. Falls back to legacy 64-byte
-    chunked mode for older firmware (≤255 bytes only in that case).
+    MicroPython v1.20+ protocol: Ctrl-A directly enters raw paste mode,
+    responding with R\x01<window_lo><window_hi><flow_ctrl> (5 bytes).
+    Older firmware responds with the text banner "raw REPL; CTRL-B to exit\r\n>"
+    followed by raw paste negotiation via \x05A\x01.
+    Falls back to legacy 64-byte chunked mode if raw paste is unavailable.
     """
     reader = _Reader(sock)
-
-    # Enter raw REPL (Ctrl-A), wait for the full banner ending with \r\n>
-    # Must match the complete banner string, not just ">", because the normal
-    # REPL prompt ">>> " arrives first and also contains ">".
-    _ws_write_frame(sock, b"\x01", _FRAME_TXT)
-    reader.read_until(b"raw REPL; CTRL-B to exit\r\n>")
-
     data = command.encode("utf-8")
 
-    # Request raw paste mode (Ctrl-E + 'A')
-    _ws_write_frame(sock, b"\x05A", _FRAME_TXT)
-    response = reader.read(2)
+    # Enter raw REPL (Ctrl-A)
+    _ws_write_frame(sock, b"\x01", _FRAME_TXT)
 
-    if response == b"R\x00":
-        # Raw paste mode accepted — read 2-byte little-endian window size
-        window = struct.unpack("<H", reader.read(2))[0]
+    # Read first 2 bytes to detect protocol version
+    head = reader.read(2)
+
+    if head[:1] == b"R":
+        # v1.20+ protocol: Ctrl-A directly entered raw paste mode
+        if head == b"R\x01":
+            # Accepted — read window size (2 bytes LE) + initial flow-control token
+            window = struct.unpack("<H", reader.read(2))[0]
+            reader.read(1)  # consume initial \x01 flow-control token
+        else:
+            # R\x00 = not supported; use legacy mode
+            window = 0
+    else:
+        # Old protocol: text banner. Put the 2 bytes back and drain to ">"
+        reader.unread(head)
+        reader.read_until(b"\r\n>")
+        # Request raw paste (Ctrl-E + 'A' + \x01)
+        _ws_write_frame(sock, b"\x05A\x01", _FRAME_TXT)
+        resp = reader.read(2)
+        if resp == b"R\x01":
+            window = struct.unpack("<H", reader.read(2))[0]
+            reader.read(1)  # initial flow-control token
+        else:
+            window = 0
+
+    if window:
+        # Raw paste mode: send in window-sized chunks, wait for \x01 between each
         i = 0
         while i < len(data):
             chunk = data[i:i + window]
             _ws_write_frame(sock, chunk, _FRAME_TXT)
             i += len(chunk)
             if i < len(data):
-                # Wait for \x01 flow-control byte before filling the window again
-                reader.read(1)
+                reader.read(1)  # wait for \x01 flow-control token
     else:
-        # Fallback: legacy 64-byte chunked mode (works for commands ≤255 bytes)
+        # Legacy fallback: 64-byte chunks (works for commands ≤255 bytes only)
         for j in range(0, len(data), 64):
             _ws_write_frame(sock, data[j:j + 64], _FRAME_TXT)
 
