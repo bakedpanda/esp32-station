@@ -35,6 +35,15 @@ IMPORTANT — understand this topology before using any tool:
 - Never assume a file exists on the Pi just because the user mentions it — create it first.
 - WiFi credentials are stored on the Pi at /etc/esp32-station/wifi.json and are never
   passed as tool parameters.
+
+KNOWN LIMITATIONS & TROUBLESHOOTING:
+
+- Blocking loop blocks WiFi tools: a `while True:` loop in main.py occupies the
+  MicroPython interpreter entirely — WebREPL cannot accept connections, so
+  get_board_status, check_board_health, and deploy_ota_wifi will all time out.
+  Always use machine.Timer for periodic tasks on boards that need to stay reachable
+  over WiFi. If a WiFi tool times out unexpectedly, ask whether main.py has a
+  blocking loop and offer to rewrite it with machine.Timer.
 """
 
 mcp = FastMCP("esp32-station", host="0.0.0.0", port=8000, instructions=TOPOLOGY)
