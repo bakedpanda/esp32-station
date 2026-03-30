@@ -3,15 +3,18 @@
 Requirements covered: BOARD-01, BOARD-02, BOARD-04, FLASH-04 (fail fast), FLASH-05 (pre-flight).
 """
 import json
+import os
 import pathlib
 import subprocess
+import sys
 import time
 
 import serial.tools.list_ports
 
 # ── Constants ──────────────────────────────────────────────────────────────
 # CRITICAL: v5 command is "esptool", NOT "esptool.py"
-ESPTOOL_CMD = "esptool"
+# Use venv-relative path so the correct esptool is found when running under systemd
+ESPTOOL_CMD = os.path.join(os.path.dirname(sys.executable), "esptool")
 BAUD = 115200
 
 # Known USB VID/PID vendor IDs for ESP32-compatible USB-UART bridges:

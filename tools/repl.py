@@ -2,13 +2,15 @@
 
 Requirements covered: REPL-01, REPL-02, REPL-03, BOARD-03, REL-01, REL-02.
 """
+import os
 import subprocess
+import sys
 import time
 
 import serial
 
 # ── Constants ──────────────────────────────────────────────────────────────
-MPREMOTE_CMD = "mpremote"
+MPREMOTE_CMD = os.path.join(os.path.dirname(sys.executable), "mpremote")
 REPL_TIMEOUT_SECONDS = 10   # default; configurable via parameter
 READ_SERIAL_TIMEOUT = 5     # shorter timeout for passive read
 

@@ -8,12 +8,14 @@ Provides:
   check_board_space()  — pre-flight filesystem usage check
   verify_file_size() — post-transfer integrity check via os.stat on board
 """
+import os
 import pathlib
 import re
 import subprocess
+import sys
 
 # ── Constants ──────────────────────────────────────────────────────────────
-MPREMOTE_CMD = "mpremote"
+MPREMOTE_CMD = os.path.join(os.path.dirname(sys.executable), "mpremote")
 SPACE_WARN_PCT = 70     # warn but proceed
 SPACE_FAIL_PCT = 90     # hard fail, do not deploy
 

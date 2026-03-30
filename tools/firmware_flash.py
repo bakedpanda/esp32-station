@@ -2,8 +2,10 @@
 
 Requirements covered: FLASH-01, FLASH-02, FLASH-03, FLASH-04, FLASH-05.
 """
+import os
 import pathlib
 import subprocess
+import sys
 import time
 
 import requests
@@ -12,7 +14,8 @@ from tools.board_detection import detect_chip
 
 # ── Constants ──────────────────────────────────────────────────────────────
 # CRITICAL: v5 command is "esptool", NOT "esptool.py"
-ESPTOOL_CMD = "esptool"
+# Use venv-relative path so the correct esptool is found when running under systemd
+ESPTOOL_CMD = os.path.join(os.path.dirname(sys.executable), "esptool")
 FLASH_BAUD = 460800      # Higher baud for actual flashing (faster transfer)
 DETECT_BAUD = 115200     # Standard baud for chip_id detection
 
