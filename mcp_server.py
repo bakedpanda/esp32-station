@@ -25,11 +25,10 @@ mcp = FastMCP("esp32-station", host="0.0.0.0", port=8000)
 
 @mcp.tool()
 def list_connected_boards() -> list[dict]:
-    """List all ESP32 boards currently connected via USB.
+    """List all ESP32 boards currently connected via USB and identify their chip variant.
 
-    Returns a list of dicts with keys: port, description, vid, pid, serial_number, chip.
-    The 'chip' value is the last-known chip type from state (or 'unknown' if never detected).
-    Use identify_chip(port) to probe a board and update its chip type.
+    Probes each detected board with esptool chip_id. Returns a list of dicts with keys:
+    port, description, vid, pid, serial_number, chip.
     """
     return list_boards()
 

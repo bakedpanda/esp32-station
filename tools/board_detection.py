@@ -54,22 +54,22 @@ def list_boards() -> list[dict]:
     """List all ESP32 boards currently connected via USB.
 
     Filters serial ports by known ESP32-compatible USB VIDs.
-    Merges last-known chip type from boards.json (does not probe hardware).
+    Probes each board with esptool chip_id to identify the chip variant.
 
     Returns: list of dicts with keys: port, description, vid, pid, serial_number, chip.
     """
-    state = load_board_state()
     boards = []
     for port in serial.tools.list_ports.comports():
         if port.vid in ESP32_VIDS:
-            key = port.device
+            chip_result = detect_chip(port.device)
+            chip = chip_result.get("chip", "unknown")
             boards.append({
                 "port": port.device,
                 "description": port.description,
                 "vid": hex(port.vid),
                 "pid": hex(port.pid) if port.pid else None,
                 "serial_number": port.serial_number,
-                "chip": state.get(key, {}).get("chip", "unknown"),
+                "chip": chip,
             })
     return boards
 
