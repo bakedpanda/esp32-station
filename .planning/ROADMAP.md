@@ -121,3 +121,16 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8
 ---
 
 **Last Updated:** 2026-03-30 -- Phase 8 added (end-to-end UAT)
+
+---
+
+## Backlog
+
+### Phase 999.1: Rename GitHub repo from ESP32-server to esp32-station (BACKLOG)
+
+**Goal:** Standardize the project name — `esp32-station` is used 49 times across 15 files (service name, MCP name, paths, tests); `ESP32-server` appears only 5 times in GitHub clone URLs. Rename the repo on GitHub, then update the 5 URL references in README.md and setup.sh.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
