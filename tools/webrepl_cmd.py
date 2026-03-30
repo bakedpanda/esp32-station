@@ -169,9 +169,11 @@ def _exec_raw_repl(sock, command: str) -> str:
     """
     reader = _Reader(sock)
 
-    # Enter raw REPL (Ctrl-A), wait for ">" prompt
+    # Enter raw REPL (Ctrl-A), wait for the full banner ending with \r\n>
+    # Must match the complete banner string, not just ">", because the normal
+    # REPL prompt ">>> " arrives first and also contains ">".
     _ws_write_frame(sock, b"\x01", _FRAME_TXT)
-    reader.read_until(b">")
+    reader.read_until(b"raw REPL; CTRL-B to exit\r\n>")
 
     data = command.encode("utf-8")
 
