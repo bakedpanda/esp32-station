@@ -70,8 +70,8 @@ def read_serial(port: str, timeout: int = READ_SERIAL_TIMEOUT) -> dict:
             if n:
                 buf.extend(ser.read(n))
                 last_rx = time.monotonic()
-            elif buf and (time.monotonic() - last_rx) > 0.5:
-                # Received data then 500 ms of silence — done
+            elif buf and (time.monotonic() - last_rx) > 1.5:
+                # Received data then 1.5 s of silence — done
                 break
             else:
                 time.sleep(0.05)
