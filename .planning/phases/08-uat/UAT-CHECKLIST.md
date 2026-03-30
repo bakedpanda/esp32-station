@@ -10,15 +10,15 @@ Mark each item `[x]` as you go. Note failures with the actual error.
 
 > Run on a clean Pi — nothing pre-installed beyond OS and git.
 
-- [ ] **A1** — Run `bash setup.sh` (or pipe from curl); script completes without errors
-- [ ] **A2** — Step 1: git and python3-venv pre-flight checks pass
-- [ ] **A3** — Step 2: Repo cloned to `~/esp32-station`
-- [ ] **A4** — Step 3: Virtualenv created, `requirements.txt` installed
-- [ ] **A5** — Step 4: User added to `dialout` group (check `groups`)
-- [ ] **A6** — Step 5/6: WiFi credentials prompted, written to `/etc/esp32-station/wifi.json`
-- [ ] **A7** — Step 7: systemd service installed (`cat /etc/systemd/system/esp32-station.service` — shows correct user/path, no planning comments)
-- [ ] **A8** — Step 8: Service starts and is active (`systemctl is-active esp32-station`)
-- [ ] **A9** — Step 9: Endpoint URL and `claude mcp add` command printed correctly
+- [x] **A1** — Run `bash setup.sh` (or pipe from curl); script completes without errors
+- [x] **A2** — Step 1: git and python3-venv pre-flight checks pass
+- [x] **A3** — Step 2: Repo cloned to `~/esp32-station`
+- [x] **A4** — Step 3: Virtualenv created, `requirements.txt` installed
+- [x] **A5** — Step 4: User added to `dialout` group (check `groups`)
+- [x] **A6** — Step 5/6: WiFi credentials prompted, written to `/etc/esp32-station/wifi.json`
+- [x] **A7** — Step 7: systemd service installed (`cat /etc/systemd/system/esp32-station.service` — shows correct user/path, no planning comments)
+- [x] **A8** — Step 8: Service starts and is active (`systemctl is-active esp32-station`)
+- [x] **A9** — Step 9: Endpoint URL and `claude mcp add` command printed correctly
 
 **Notes:**
 
@@ -28,11 +28,11 @@ Mark each item `[x]` as you go. Note failures with the actual error.
 
 > Re-run setup.sh on the same Pi without a clean OS.
 
-- [ ] **B1** — `bash setup.sh` completes without errors on second run
-- [ ] **B2** — No duplicate dialout group entries
-- [ ] **B3** — Credentials not re-prompted (file already exists, skipped)
-- [ ] **B4** — Service not double-installed or left in broken state
-- [ ] **B5** — `git pull` runs instead of re-clone
+- [x] **B1** — `bash setup.sh` completes without errors on second run
+- [x] **B2** — No duplicate dialout group entries
+- [x] **B3** — Credentials not re-prompted (file already exists, skipped)
+- [x] **B4** — Service not double-installed or left in broken state
+- [x] **B5** — `git pull` runs instead of re-clone
 
 **Notes:**
 
@@ -145,8 +145,8 @@ Mark each item `[x]` as you go. Note failures with the actual error.
 
 | Section | Items | Pass | Fail | Skip |
 |---------|-------|------|------|------|
-| A: Fresh Pi Install | 9 | | | |
-| B: Idempotency | 5 | | | |
+| A: Fresh Pi Install | 9 | 9 | | |
+| B: Idempotency | 5 | 5 | | |
 | C: MCP Registration | 3 | 3 | | |
 | D: Discovery & ID | 3 | 3 | | |
 | E: Flash & Provisioning | 5 | 5 | | |
@@ -155,9 +155,9 @@ Mark each item `[x]` as you go. Note failures with the actual error.
 | H: Board Status | 3 | 3 | | |
 | I: OTA WiFi | 1 | 1 | | |
 | J: Error Handling | 4 | 4 | | |
-| **Total** | **42** | **28** | | **14** |
+| **Total** | **42** | **42** | | |
 
-**UAT Result:** PARTIAL — 28/42 pass; A (Fresh Pi Install) and B (Idempotency) deferred pending Pi wipe
+**UAT Result:** PASS
 
 **Sign-off date:**
 
