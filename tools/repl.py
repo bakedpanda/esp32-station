@@ -59,9 +59,7 @@ def read_serial(port: str, timeout: int = READ_SERIAL_TIMEOUT) -> dict:
     """
     try:
         ser = serial.Serial(port, baudrate=115200, timeout=0.1,
-                            dsrdtr=False, rtscts=False)
-        ser.dtr = False
-        ser.rts = False
+                            rtscts=False)
 
         deadline = time.monotonic() + timeout
         buf = bytearray()
