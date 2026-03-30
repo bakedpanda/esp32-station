@@ -182,14 +182,6 @@ def webrepl_exec(host: str, password: str, command: str,
         _client_handshake(s)
         ws = _WebSocket(s)
         _login(ws, password)
-        # Drain any post-login banner (e.g. "WebREPL connected\r\n\r\n")
-        # before entering raw REPL mode.
-        ws.s.settimeout(1)
-        try:
-            _read_until(ws, b"\n\n", max_bytes=256)
-        except (socket.timeout, AssertionError):
-            pass
-        ws.s.settimeout(timeout)
         ws.ioctl(9, 2)
         output = _exec_raw_repl(ws, command)
         return {"output": output}
