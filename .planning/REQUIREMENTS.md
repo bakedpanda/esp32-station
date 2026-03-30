@@ -9,9 +9,9 @@ Requirements for the Provisioning & Onboarding milestone.
 
 ### Setup & Onboarding
 
-- [ ] **SETUP-01**: New user can run a single `setup.sh` script that clones the repo, installs dependencies, prompts for WiFi credentials, writes the credentials file, and installs+starts the systemd service
+- [x] **SETUP-01**: New user can run a single `setup.sh` script that clones the repo, installs dependencies, prompts for WiFi credentials, writes the credentials file, and installs+starts the systemd service
 - [x] **SETUP-02**: WiFi credentials are stored on the Pi and read locally by the MCP server -- never transmitted through MCP tool calls
-- [ ] **SETUP-03**: README includes clear instructions for registering the MCP server URL in Claude Code on the main machine
+- [x] **SETUP-03**: README includes clear instructions for registering the MCP server URL in Claude Code on the main machine
 
 ### Provisioning
 
@@ -61,9 +61,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SETUP-01 | Phase 7 | Pending |
+| SETUP-01 | Phase 7 | Complete |
 | SETUP-02 | Phase 6 | Complete |
-| SETUP-03 | Phase 7 | Pending |
+| SETUP-03 | Phase 7 | Complete |
 | PROV-01 | Phase 6 | Complete |
 | PROV-02 | Phase 6 | Complete |
 | PROV-03 | Phase 6 | Complete |

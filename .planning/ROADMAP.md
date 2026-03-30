@@ -83,9 +83,9 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Running setup.sh on a fresh Pi clones the repo, installs all dependencies, prompts for WiFi credentials, writes the credentials file, and installs+starts the systemd service
   2. README contains clear instructions for registering the MCP server URL in Claude Code on the main machine
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
-- [ ] 07-01-PLAN.md -- Test scaffolds: test_setup_script.py (SETUP-01 content tests) and test_readme.py (SETUP-03 content tests)
+- [x] 07-01-PLAN.md -- Test scaffolds: test_setup_script.py (SETUP-01 content tests) and test_readme.py (SETUP-03 content tests)
 - [ ] 07-02-PLAN.md -- Write setup.sh: idempotent Pi onboarding script (SETUP-01)
 - [ ] 07-03-PLAN.md -- Update README.md: 15 tools table, 12 architecture modules, setup.sh reference, MCP registration (SETUP-03)
 
@@ -102,7 +102,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7
 | 4. Hardening | v1.1 | 2/2 | Complete | 2026-03-30 |
 | 5. Board Status | v1.1 | 3/3 | Complete | 2026-03-29 |
 | 6. Provisioning | v1.1 | 2/2 | Complete   | 2026-03-29 |
-| 7. Setup & Onboarding | v1.1 | 0/3 | Not started | - |
+| 7. Setup & Onboarding | v1.1 | 1/3 | In Progress|  |
 
 ---
 
