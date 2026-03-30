@@ -159,6 +159,7 @@ def deploy_file_to_board(port: str, local_path: str, remote_path: str | None = N
 
     Checks filesystem space before transfer (warns at 70%, fails at 90%).
     Verifies file integrity (size) after transfer.
+    Automatically hard-resets the board after a successful deploy.
     Serializes access to the port — safe to call concurrently for different ports.
 
     Returns {"port": port, "files_written": [remote_path]} on success.
@@ -186,6 +187,7 @@ def deploy_directory_to_board(port: str, local_dir: str) -> dict:
     Excludes: __pycache__/, *.pyc, .git/, tests/, .planning/
     Deploys: .py files and non-Python resources (.json, .txt, etc.)
     Checks filesystem space before transfer; verifies integrity after each file.
+    Automatically hard-resets the board after a successful deploy.
 
     Returns {"port": port, "files_written": [...]} on success.
     Returns {"error": error_code, "detail": ...} on failure.
@@ -280,6 +282,9 @@ def deploy_ota_wifi(host: str, local_path: str, remote_path: str) -> dict:
     Transfers a single file from the Pi to the board using the webrepl_cli.py script.
     The board must have boot.py deployed via deploy_boot_config (WebREPL enabled).
 
+    After a successful deploy, tell the user to reset the board to run the new code
+    (press the RST button or power cycle). Cannot reset automatically over WiFi.
+
     No SerialLock applied — this is a WiFi operation with no serial port.
     If WiFi is unavailable, use deploy_file_to_board() instead (USB fallback).
 
@@ -305,6 +310,7 @@ def pull_and_deploy_github(
     Clones the repository (shallow, --depth 1) into a temporary directory on the Pi,
     then deploys the contents using deploy_directory() — the same pipeline as
     deploy_directory_to_board() including space checks, exclusions, and integrity checks.
+    Automatically hard-resets the board after a successful deploy.
 
     Uses SerialLock to serialize USB access — safe to call concurrently for different ports.
 
