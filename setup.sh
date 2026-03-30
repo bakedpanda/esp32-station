@@ -72,17 +72,17 @@ fi
 SKIP_CREDS=0
 if [ -f "$CREDS_PATH" ]; then
     log "Credentials file already exists at $CREDS_PATH."
-    read -rp "Overwrite existing credentials? [y/N]: " OVERWRITE
+    read -rp "Overwrite existing credentials? [y/N]: " OVERWRITE </dev/tty
     [[ "$OVERWRITE" =~ ^[Yy]$ ]] || SKIP_CREDS=1
 fi
 
 if [ "$SKIP_CREDS" -eq 0 ]; then
     echo ""
     echo "Enter WiFi and WebREPL credentials (will be written to $CREDS_PATH)."
-    read -rp  "WiFi SSID: " WIFI_SSID
-    read -rsp "WiFi password: " WIFI_PASSWORD
+    read -rp  "WiFi SSID: " WIFI_SSID </dev/tty
+    read -rsp "WiFi password: " WIFI_PASSWORD </dev/tty
     echo
-    read -rsp "WebREPL password (for over-WiFi REPL access): " WEBREPL_PASSWORD
+    read -rsp "WebREPL password (for over-WiFi REPL access): " WEBREPL_PASSWORD </dev/tty
     echo
 fi
 
