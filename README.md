@@ -21,6 +21,27 @@ All capabilities are exposed as MCP tools — Claude calls them directly, no cop
 
 ## Setup
 
+**Quick setup (recommended)**
+
+Run the setup script on your Pi. It handles everything: clones the repo, creates a virtualenv, installs dependencies, adds you to the `dialout` group, prompts for WiFi credentials, and installs+starts the systemd service.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/bakedpanda/ESP32-server/main/setup.sh | bash
+```
+
+Or clone first and run locally:
+
+```bash
+git clone https://github.com/bakedpanda/ESP32-server.git esp32-station
+bash esp32-station/setup.sh
+```
+
+The script prints the `claude mcp add` command at the end — copy-paste it on your main machine to register the server.
+
+**Manual setup (fallback)**
+
+If you prefer to do it step by step:
+
 **1. Clone and install dependencies**
 
 ```bash
@@ -38,7 +59,19 @@ sudo usermod -aG dialout $USER
 # Log out and back in for this to take effect
 ```
 
-**3. Install the systemd service**
+**3. Create WiFi credentials file**
+
+```bash
+sudo mkdir -p /etc/esp32-station
+sudo tee /etc/esp32-station/wifi.json << 'EOF'
+{"ssid": "YOUR_SSID", "password": "YOUR_WIFI_PASSWORD", "webrepl_password": "YOUR_WEBREPL_PASS"}
+EOF
+sudo chmod 600 /etc/esp32-station/wifi.json
+```
+
+**4. Install the systemd service**
+
+Edit `esp32-station.service` to replace `User=esp32` and `/home/esp32` with your actual username and home directory, then:
 
 ```bash
 sudo cp esp32-station.service /etc/systemd/system/
@@ -47,15 +80,13 @@ sudo systemctl enable esp32-station
 sudo systemctl start esp32-station
 ```
 
-The service starts automatically on boot and runs the MCP server on port 8000.
-
-**4. Register with Claude Code (on your main machine)**
+**5. Register with Claude Code (on your main machine)**
 
 ```bash
 claude mcp add --transport http esp32-station http://raspberrypi.local:8000/mcp
 ```
 
-Replace `raspberrypi.local` with your Pi's hostname or IP if different.
+Replace `raspberrypi.local` with your Pi's actual hostname or IP address. Find the hostname with `hostname` and the IP with `hostname -I`.
 
 ## MCP Tools
 
@@ -72,6 +103,10 @@ Replace `raspberrypi.local` with your Pi's hostname or IP if different.
 | `reset_board` | Soft or hard reset a board via USB |
 | `deploy_ota_wifi` | Deploy a file to a board over WiFi via WebREPL |
 | `pull_and_deploy_github` | Pull a GitHub repo and deploy to a board via USB |
+| `get_board_status` | Query board firmware version, WiFi status, IP address, free memory, and free storage |
+| `check_board_health` | Check whether MicroPython is running and the board is responsive; reports issues clearly |
+| `discover_boards` | Discover MicroPython boards on the local network via mDNS; returns IP addresses |
+| `deploy_boot_config` | Deploy a boot.py with WiFi, WebREPL, and mDNS advertisement config to a board, reading credentials from the Pi-local credentials file |
 
 ## Architecture
 
@@ -88,7 +123,12 @@ Raspberry Pi :8000
         ├── repl.py             — REPL exec, serial read, reset (mpremote)
         ├── serial_lock.py      — Per-port file lock (prevents USB conflicts)
         ├── ota_wifi.py         — WiFi OTA deploy (webrepl_cli.py subprocess)
-        └── github_deploy.py    — GitHub clone + deploy (git + deploy_directory)
+        ├── github_deploy.py    — GitHub clone + deploy (git + deploy_directory)
+        ├── board_status.py     — Board status queries (firmware, WiFi, memory, storage)
+        ├── webrepl_cmd.py      — WebREPL command transport (over-WiFi REPL)
+        ├── mdns_discovery.py   — mDNS board discovery via python-zeroconf
+        ├── credentials.py      — WiFi + WebREPL credential loading from Pi-local file
+        └── boot_deploy.py      — boot.py template generation and deployment
     │
     ▼
 ESP32 board(s) via USB
@@ -114,6 +154,10 @@ pytest
 | 1 — Foundation & Infrastructure | MCP server + board detection + firmware flashing | Complete |
 | 2 — Core USB Workflows | File deploy + REPL + serial lock + error handling | Complete |
 | 3 — WiFi & Advanced | WebREPL OTA + GitHub deploy | Complete |
+| 4 — Hardening | Reliable resets (DTR/RTS), explicit --chip enforcement, tech debt cleanup | Complete |
+| 5 — Board Status | Board health check, firmware query, WiFi status, mDNS discovery | Complete |
+| 6 — Provisioning | Always-erase flash, WiFi credential management, boot.py deployment | Complete |
+| 7 — Setup & Onboarding | One-command Pi setup script, updated documentation | Complete |
 
 ## Out of scope
 
