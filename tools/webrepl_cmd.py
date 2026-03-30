@@ -1,8 +1,8 @@
 """WebREPL command execution helper for ESP32 boards over WiFi.
 
 Executes MicroPython commands on boards via the WebREPL websocket protocol.
-Uses raw sockets (stdlib only) to implement the minimal websocket handshake
-matching MicroPython's WebREPL server.
+Uses the same websocket framing as tools/vendor/webrepl_cli.py to ensure
+compatibility with MicroPython's WebREPL server.
 
 Requirements covered: STAT-01 (WiFi path), STAT-02 (WiFi path).
 """
@@ -11,39 +11,73 @@ import struct
 
 # ── Constants ────────────────────────────────────────────────────────────
 WEBREPL_PORT = 8266
+_FRAME_TXT = 0x81
+_FRAME_BIN = 0x82
+
+
+# ── WebSocket class (matches MicroPython's WebREPL server expectations) ──
+# Adapted from tools/vendor/webrepl_cli.py to ensure frame compatibility.
+
+class _WebSocket:
+    def __init__(self, s):
+        self.s = s
+        self.buf = b""
+
+    def write(self, data, frame=_FRAME_BIN):
+        l = len(data)
+        if l < 126:
+            hdr = struct.pack(">BB", frame, l)
+        else:
+            hdr = struct.pack(">BBH", frame, 126, l)
+        self.s.send(hdr)
+        self.s.send(data)
+
+    def _recvexactly(self, sz):
+        res = b""
+        while sz:
+            data = self.s.recv(sz)
+            if not data:
+                break
+            res += data
+            sz -= len(data)
+        return res
+
+    def read(self, size, text_ok=False):
+        if not self.buf:
+            while True:
+                hdr = self._recvexactly(2)
+                assert len(hdr) == 2
+                fl, sz = struct.unpack(">BB", hdr)
+                if sz == 126:
+                    hdr = self._recvexactly(2)
+                    assert len(hdr) == 2
+                    (sz,) = struct.unpack(">H", hdr)
+                if fl == _FRAME_BIN:
+                    break
+                if text_ok and fl == _FRAME_TXT:
+                    break
+                # skip unexpected frame type
+                while sz:
+                    skip = self.s.recv(sz)
+                    sz -= len(skip)
+            data = self._recvexactly(sz)
+            self.buf = data
+
+        d = self.buf[:size]
+        self.buf = self.buf[size:]
+        return d
+
+    def ioctl(self, req, val):
+        assert req == 9 and val == 2
 
 
 # ── Internal helpers ─────────────────────────────────────────────────────
 
-def _ws_write_text(sock, data: bytes):
-    """Send a websocket text frame (opcode 0x81)."""
-    length = len(data)
-    if length < 126:
-        header = struct.pack(">BB", 0x81, length)
-    else:
-        header = struct.pack(">BBH", 0x81, 126, length)
-    sock.sendall(header + data)
-
-
-def _ws_read(sock, bufsize: int = 4096) -> bytes:
-    """Read data from socket, returning raw bytes."""
-    return sock.recv(bufsize)
-
-
-def _read_until(sock, marker: bytes, max_bytes: int = 8192) -> bytes:
-    """Read from socket until marker is found or max_bytes exceeded."""
-    buf = b""
-    while marker not in buf and len(buf) < max_bytes:
-        chunk = sock.recv(1024)
-        if not chunk:
-            break
-        buf += chunk
-    return buf
-
-
-def _do_handshake(sock):
-    """Perform simplified websocket client handshake (matching webrepl_cli.py)."""
-    handshake = (
+def _client_handshake(sock):
+    """HTTP WebSocket upgrade (MicroPython WebREPL variant).
+    Uses makefile line-by-line reading to reliably consume HTTP headers."""
+    cl = sock.makefile("rwb", 0)
+    cl.write(
         b"GET / HTTP/1.1\r\n"
         b"Host: echo.websocket.org\r\n"
         b"Connection: Upgrade\r\n"
@@ -51,34 +85,44 @@ def _do_handshake(sock):
         b"Sec-WebSocket-Key: foo\r\n"
         b"\r\n"
     )
-    sock.sendall(handshake)
-    # Read until blank line signals end of HTTP headers
-    _read_until(sock, b"\r\n\r\n")
+    cl.readline()  # HTTP/1.1 101 Switching Protocols
+    while True:
+        l = cl.readline()
+        if l == b"\r\n":
+            break
 
 
-def _do_login(sock, password: str):
-    """Wait for Password: prompt and send password."""
-    _read_until(sock, b"Password: ")
-    _ws_write_text(sock, password.encode("utf-8") + b"\r")
-    # Read login response (success/fail message)
-    _read_until(sock, b"\r\n")
+def _login(ws, password):
+    """Wait for Password: prompt (byte-by-byte via ws.read) and send password."""
+    while True:
+        c = ws.read(1, text_ok=True)
+        if c == b":":
+            ws.read(1, text_ok=True)  # consume the space after ":"
+            break
+    ws.write(password.encode("utf-8") + b"\r")
 
 
-def _exec_raw_repl(sock, command: str) -> str:
+def _read_until(ws, marker, max_bytes=8192):
+    """Read bytes from websocket (proper frame decoding) until marker found."""
+    buf = b""
+    while marker not in buf and len(buf) < max_bytes:
+        buf += ws.read(1, text_ok=True)
+    return buf
+
+
+def _exec_raw_repl(ws, command):
     """Enter raw REPL, execute command, return output string."""
-    # Enter raw REPL mode (Ctrl-A)
-    _ws_write_text(sock, b"\x01")
-    _read_until(sock, b">")
+    # Enter raw REPL mode (Ctrl-A) — use text frame
+    ws.write(b"\x01", _FRAME_TXT)
+    _read_until(ws, b">")
 
-    # Send command + Ctrl-D to execute
-    _ws_write_text(sock, command.encode("utf-8") + b"\x04")
+    # Send command + Ctrl-D to execute — use text frame
+    ws.write(command.encode("utf-8") + b"\x04", _FRAME_TXT)
 
-    # Read output: "OK<output>\x04>" pattern
-    raw = _read_until(sock, b"\x04>")
-    # Parse output between "OK" and "\x04"
+    # Response format: OK<output>\x04<error>\x04>
+    raw = _read_until(ws, b"\x04>")
     text = raw.decode("utf-8", errors="replace")
 
-    # Extract output after "OK" and before the end marker
     ok_idx = text.find("OK")
     if ok_idx >= 0:
         text = text[ok_idx + 2:]
@@ -118,8 +162,11 @@ def webrepl_exec(host: str, password: str, command: str,
         }
 
     try:
-        sock = socket.create_connection((host, port), timeout=timeout)
-        sock.settimeout(timeout)
+        s = socket.socket()
+        ai = socket.getaddrinfo(host, port)
+        addr = ai[0][4]
+        s.settimeout(timeout)
+        s.connect(addr)
     except socket.timeout:
         return {
             "error": "wifi_timeout",
@@ -132,9 +179,19 @@ def webrepl_exec(host: str, password: str, command: str,
         }
 
     try:
-        _do_handshake(sock)
-        _do_login(sock, password)
-        output = _exec_raw_repl(sock, command)
+        _client_handshake(s)
+        ws = _WebSocket(s)
+        _login(ws, password)
+        # Drain any post-login banner (e.g. "WebREPL connected\r\n\r\n")
+        # before entering raw REPL mode.
+        ws.s.settimeout(1)
+        try:
+            _read_until(ws, b"\n\n", max_bytes=256)
+        except (socket.timeout, AssertionError):
+            pass
+        ws.s.settimeout(timeout)
+        ws.ioctl(9, 2)
+        output = _exec_raw_repl(ws, command)
         return {"output": output}
     except socket.timeout:
         return {
@@ -153,6 +210,6 @@ def webrepl_exec(host: str, password: str, command: str,
         }
     finally:
         try:
-            sock.close()
+            s.close()
         except Exception:
             pass

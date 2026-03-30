@@ -1,7 +1,10 @@
 """Tests for WebREPL command execution helper: webrepl_exec."""
 import socket
+import struct
 import pytest
 from unittest.mock import patch, MagicMock
+
+from tools.webrepl_cmd import webrepl_exec, WEBREPL_PORT
 
 
 HOST = "192.168.1.42"
@@ -9,48 +12,71 @@ PASSWORD = "testpass"
 COMMAND = "print(1)"
 
 
+def _frame(data: bytes, ftype: int = 0x81) -> bytes:
+    """Build a minimal (unmasked) WebSocket frame."""
+    l = len(data)
+    hdr = struct.pack(">BB", ftype, l) if l < 126 else struct.pack(">BBH", ftype, 126, l)
+    return hdr + data
+
+
+def _make_mock_sock(ws_payload: bytes):
+    """Return a mock socket whose recv feeds ws_payload, and makefile returns HTTP 101."""
+    buf = bytearray(ws_payload)
+    mock_sock = MagicMock()
+
+    def recv(sz):
+        chunk = bytes(buf[:sz])
+        del buf[:sz]
+        return chunk
+
+    mock_sock.recv = recv
+
+    # makefile is used only for the HTTP handshake (readline loop)
+    mock_file = MagicMock()
+    mock_file.readline.side_effect = [
+        b"HTTP/1.1 101 Switching Protocols\r\n",
+        b"Upgrade: websocket\r\n",
+        b"\r\n",
+    ]
+    mock_sock.makefile.return_value = mock_file
+    return mock_sock
+
+
 # ── webrepl_exec tests ───────────────────────────────────────────────────
 
 
 def test_webrepl_exec_success():
-    """webrepl_exec returns {"output": "..."} on successful command execution."""
-    mock_sock = MagicMock()
-    # Simulate websocket handshake response (HTTP upgrade) then password prompt then command output
-    # The implementation reads lines until blank line (handshake), then reads until "Password:" (login),
-    # then sends command in raw REPL mode and reads output.
-    handshake_resp = b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\n\r\n"
-    password_prompt = b"Password: "
-    # After login, we enter raw REPL: send \x01, get "raw REPL; CTRL-B to exit\n>",
-    # send command + \x04, get "OK" + output + "\x04>" (end marker)
-    raw_repl_prompt = b"raw REPL; CTRL-B to exit\r\n>"
-    command_output = b"OK1\x04>"
+    """webrepl_exec returns {"output": "..."} on successful command execution.
 
-    responses = [handshake_resp, password_prompt, raw_repl_prompt, command_output]
-    call_idx = [0]
-
-    def mock_recv(bufsize):
-        if call_idx[0] < len(responses):
-            data = responses[call_idx[0]]
-            call_idx[0] += 1
-            return data
-        return b""
-
-    mock_sock.recv = mock_recv
-    mock_sock.sendall = MagicMock()
+    Frame sequence after HTTP handshake:
+      1. Text frame: "Password: "  (login prompt, read byte-by-byte)
+      2. Text frame: "WebREPL connected\\r\\n\\r\\n"  (post-login banner, drained)
+      3. Text frame: "raw REPL; CTRL-B to exit\\r\\n>"  (raw REPL entry prompt)
+      4. Text frame: "OK1\\x04>"  (command output + end marker)
+    """
+    ws_payload = (
+        _frame(b"Password: ")
+        + _frame(b"WebREPL connected\r\n\r\n")
+        + _frame(b"raw REPL; CTRL-B to exit\r\n>")
+        + _frame(b"OK1\x04>")
+    )
+    mock_sock = _make_mock_sock(ws_payload)
 
     with patch("socket.socket", return_value=mock_sock), \
-         patch("socket.create_connection", return_value=mock_sock):
-        from tools.webrepl_cmd import webrepl_exec
+         patch("socket.getaddrinfo", return_value=[(None, None, None, None, (HOST, WEBREPL_PORT))]):
         result = webrepl_exec(HOST, PASSWORD, COMMAND, timeout=5)
 
-    assert "output" in result
     assert "error" not in result
+    assert result.get("output") == "1"
 
 
-def test_webrepl_exec_timeout():
-    """webrepl_exec returns wifi_timeout error on socket.timeout."""
-    with patch("socket.create_connection", side_effect=socket.timeout("timed out")):
-        from tools.webrepl_cmd import webrepl_exec
+def test_webrepl_exec_timeout_on_connect():
+    """webrepl_exec returns wifi_timeout when socket.connect times out."""
+    mock_sock = MagicMock()
+    mock_sock.connect.side_effect = socket.timeout("timed out")
+
+    with patch("socket.socket", return_value=mock_sock), \
+         patch("socket.getaddrinfo", return_value=[(None, None, None, None, (HOST, WEBREPL_PORT))]):
         result = webrepl_exec(HOST, PASSWORD, COMMAND, timeout=5)
 
     assert result["error"] == "wifi_timeout"
@@ -58,9 +84,12 @@ def test_webrepl_exec_timeout():
 
 
 def test_webrepl_exec_unreachable():
-    """webrepl_exec returns wifi_unreachable error on OSError."""
-    with patch("socket.create_connection", side_effect=OSError("Connection refused")):
-        from tools.webrepl_cmd import webrepl_exec
+    """webrepl_exec returns wifi_unreachable when socket.connect raises OSError."""
+    mock_sock = MagicMock()
+    mock_sock.connect.side_effect = OSError("Connection refused")
+
+    with patch("socket.socket", return_value=mock_sock), \
+         patch("socket.getaddrinfo", return_value=[(None, None, None, None, (HOST, WEBREPL_PORT))]):
         result = webrepl_exec(HOST, PASSWORD, COMMAND, timeout=5)
 
     assert result["error"] == "wifi_unreachable"
@@ -69,8 +98,6 @@ def test_webrepl_exec_unreachable():
 
 def test_webrepl_exec_missing_password():
     """webrepl_exec returns invalid_params error when password is empty or None."""
-    from tools.webrepl_cmd import webrepl_exec
-
     result_none = webrepl_exec(HOST, None, COMMAND)
     assert result_none["error"] == "invalid_params"
     assert "password" in result_none["detail"].lower()
