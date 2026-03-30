@@ -87,7 +87,7 @@ def detect_chip(port: str) -> dict:
     """
     try:
         result = subprocess.run(
-            [ESPTOOL_CMD, "--chip", "auto", "--port", port, "--baud", str(BAUD), "chip_id"],
+            [ESPTOOL_CMD, "--chip", "auto", "--port", port, "--baud", str(BAUD), "chip-id"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -100,9 +100,14 @@ def detect_chip(port: str) -> dict:
     if result.returncode != 0:
         return {"error": "chip_id_failed", "detail": result.stderr.strip()}
 
-    # Parse "Chip is ESP32-S3 (revision v0.1)" from stdout
+    # Parse chip type from esptool output.
+    # v5 format: "Chip type:          ESP32-D0WD (revision v1.0)"
+    # older format: "Chip is ESP32-S3 (revision v0.1)"
     chip = None
     for line in result.stdout.splitlines():
+        if "Chip type:" in line:
+            chip = line.split("Chip type:")[1].split("(")[0].strip()
+            break
         if "Chip is" in line:
             chip = line.split("Chip is")[1].split("(")[0].strip()
             break
