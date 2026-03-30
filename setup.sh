@@ -83,7 +83,7 @@ if [ "$SKIP_CREDS" -eq 0 ]; then
     read -rsp "WiFi password: " WIFI_PASSWORD </dev/tty
     echo
     # Generate a random WebREPL password — user can look it up in /etc/esp32-station/wifi.json if needed
-    WEBREPL_PASSWORD=$("$VENV/bin/python3" -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12)))")
+    WEBREPL_PASSWORD=$("$VENV/bin/python3" -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(9)))")
     log "WebREPL password generated automatically."
 fi
 
