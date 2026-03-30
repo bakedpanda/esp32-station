@@ -55,10 +55,11 @@ def flash_micropython(port: str, chip: str | None = None) -> dict:
     no partial flash states from previous firmware. The board will be completely
     blank after erase and before the new firmware is written.
 
-    The user must hold the BOOT button on the ESP32, then briefly press EN (reset)
-    while still holding BOOT. Release BOOT when 'Connecting...' appears. The BOOT
-    button is usually the smaller of two buttons on the board. This puts the chip
-    into bootloader/download mode required for flashing.
+    The user must hold the BOOT button on the ESP32 before and during the erase/flash
+    process. Release the BOOT button only when the "Erasing" message appears in the output.
+    If dots keep appearing after "Connecting..." the board is not in flashing mode —
+    release and re-hold BOOT and try again. The BOOT button is usually labelled "BOOT"
+    or "FLASH" and is one of two buttons on the board.
 
     Automatically selects the correct firmware for the chip variant.
     Firmware is cached locally (7-day TTL); network not required if cache is fresh.
@@ -76,14 +77,14 @@ def flash_micropython(port: str, chip: str | None = None) -> dict:
     result = flash_firmware(port, chip=chip)
     if result.get("error") == "erase_failed":
         result["user_action"] = (
-            "Hold the BOOT button on the ESP32 board, then briefly press "
-            "the EN (reset) button while still holding BOOT. Release BOOT "
-            "when you see 'Connecting...' in the output. The BOOT button is "
-            "usually the smaller of two buttons on the board."
+            "Hold the BOOT button on the ESP32 board and keep holding it. "
+            "Release it only when you see 'Erasing' in the output. "
+            "If dots keep appearing after 'Connecting...' the board is not in "
+            "flashing mode — release, re-hold BOOT, and retry."
         )
         result["reason"] = (
-            "ESP32 must be in bootloader mode for firmware flashing. "
-            "The BOOT button forces the chip into download mode."
+            "ESP32 must be in bootloader mode for flashing. "
+            "The BOOT button (sometimes labelled FLASH) forces the chip into download mode."
         )
     return result
 
